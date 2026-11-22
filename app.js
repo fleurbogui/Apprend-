@@ -399,6 +399,7 @@ function router() {
   const etapeValide = niveauValide && Number.isInteger(e) && e >= 0 && e < NIVEAUX[n].etapes.length;
 
   fermerModale();
+  document.body.classList.remove('jeu');
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   window.scrollTo(0, 0);
 
@@ -883,8 +884,9 @@ function afficherExercice() {
     ? `<img class="fond-flou" src="${esc(image)}" alt="" aria-hidden="true"><img class="photo-principale" src="${esc(image)}" alt="">`
     : `<div class="emoji-exo">${esc(image)}</div>`;
 
+  document.body.classList.add('jeu');
   $('#app').innerHTML = `
-    <section class="ecran">
+    <section class="ecran ecran-exo">
       <header class="exo-haut">
         <button type="button" class="btn-rond" data-action="quitter" aria-label="Quitter">${ico('fermer')}</button>
         <div class="segments" aria-label="Exercice ${index + 1} sur ${exercices.length}">
@@ -990,6 +992,8 @@ function dessinerPied() {
   const ex = session.ex;
   const pied = $('#pied');
   if (!pied) return;
+  const ecran = pied.closest('.ecran-exo');
+  if (ecran) ecran.classList.toggle('fini', !!ex.fini);
   const dernier = session.index === session.exercices.length - 1;
   const continuer = `<button type="button" class="btn ${ex.reussi ? 'btn-vert' : 'btn-rouge'} btn-large" data-action="suivant">
       ${dernier ? 'Voir mon résultat · 看结果' : 'Continuer · 继续'} ${ico('jouer')}</button>`;

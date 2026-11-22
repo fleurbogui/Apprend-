@@ -1,7 +1,7 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors ligne.
 // Il doit rester à la racine du site. Augmenter VERSION à chaque mise en ligne.
 
-const VERSION = 'v2.8.0';
+const VERSION = 'v2.9.0';
 const NOM_CACHE = 'apprend-plus-' + VERSION;
 
 // La liste des photos est lue dans data.js.

@@ -363,6 +363,44 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .saisie:focus { outline: none; border-color: var(--rouge); }
 .saisie::placeholder { letter-spacing: 0; color: #C9A9A8; font-size: 1rem; }
 
+/* L'écran de jeu tient sur une seule hauteur d'écran, sans défilement */
+body.jeu { overflow: hidden; overscroll-behavior: none; }
+.ecran-exo { height: 100vh; height: 100dvh; overflow: hidden; animation: none; }
+.ecran-exo .exo-haut { flex-shrink: 0; padding-top: calc(8px + var(--sur-haut)); padding-bottom: 4px; }
+.ecran-exo .zone-exo { flex: 1 1 auto; min-height: 0; gap: clamp(4px, 1.4vh, 12px); padding: 4px 16px 8px; }
+.ecran-exo .zone-exo > * { flex-shrink: 0; }
+.ecran-exo .polaroid {
+  flex: 1 1 0; min-height: 64px; max-height: 320px;
+  width: auto; max-width: 100%; aspect-ratio: 4 / 3;
+  display: flex; margin-top: 10px; padding: 8px 8px 10px;
+}
+.ecran-exo .polaroid .cadre { flex: 1; aspect-ratio: auto; min-height: 0; }
+.ecran-exo .pied-exo { position: static; flex-shrink: 0; }
+.ecran-exo.fini .saisie, .ecran-exo.fini .tuiles, .ecran-exo.fini .message-essai { display: none; }
+@media (max-height: 700px) {
+  .ecran-exo .consigne { font-size: 1rem; }
+  .ecran-exo .consigne .zh { font-size: .85rem; }
+  .ecran-exo .tuile { width: 48px; height: 50px; font-size: 1.35rem; }
+  .ecran-exo .tuiles { gap: 7px; }
+  .ecran-exo .case { height: 46px; font-size: 1.4rem; }
+  .ecran-exo .saisie { min-height: 50px; padding: 8px 14px; }
+  .ecran-exo .pied-exo { padding-top: 10px; padding-bottom: calc(10px + var(--sur-bas)); }
+  .ecran-exo .btn { min-height: 46px; }
+}
+@media (max-height: 560px) {
+  .ecran-exo .type-exo { display: none; }
+  .ecran-exo .consigne .zh { display: none; }
+}
+@media (max-height: 480px) {
+  .ecran-exo .consigne { font-size: .92rem; margin-top: 0; }
+  .ecran-exo .tuile { width: 42px; height: 44px; font-size: 1.2rem; }
+  .ecran-exo .tuiles { gap: 6px; }
+  .ecran-exo .case { height: 38px; font-size: 1.2rem; }
+  .ecran-exo .message-essai { min-height: 18px; font-size: .85rem; }
+  .ecran-exo .bulle-indice { padding: 6px 10px; font-size: .85rem; }
+  .ecran-exo .btn-rond { width: 40px; height: 40px; }
+}
+
 /* Barre du bas de l'exercice */
 .pied-exo {
   position: sticky; bottom: 0; z-index: 5;
