@@ -1,10 +1,13 @@
-# Configuration Netlify.
-# Site relié à GitHub : la commande crée config.js à partir des variables
-# SUPABASE_URL et SUPABASE_ANON_KEY définies dans Netlify.
-# Dépôt par glisser-déposer : lancer node outils/generer-config.js avant.
+# Configuration Netlify. Le site est publié tel quel, sans étape de build :
+# config.js est généré en local avec node outils/generer-config.js puis versionné.
 [build]
   publish = "."
-  command = "node outils/generer-config.js"
+
+# L'adresse Supabase et la clé anon sont publiques par nature (elles sont lues
+# par les téléphones). Le scanner de secrets de Netlify ne doit pas les bloquer.
+# La clé service_role, elle, ne doit jamais apparaître dans le projet.
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,SUPABASE_ANON_KEY"
 
 # Fichiers qui ne doivent pas être servis
 [[redirects]]

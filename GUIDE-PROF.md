@@ -55,7 +55,7 @@ Seuls les comptes dont l'e-mail figure dans la table `profs` et a été confirm�
 
 4. Mettre le dossier en ligne (par exemple sur https://app.netlify.com/drop).
 
-Si le site est relié à GitHub, `.env` n'y est pas envoyé. Il faut alors saisir `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans les variables d'environnement de Netlify (Site configuration, Environment variables) ou de Vercel (Settings, Environment Variables). Le script est lancé automatiquement à chaque déploiement.
+Si le site est relié à GitHub, `.env` n'y est pas envoyé, mais `config.js` l'est. L'hébergeur publie les fichiers tels quels. Après un changement de `.env`, relancer le script, puis envoyer `config.js` sur GitHub.
 
 ## 5. Le tableau de bord
 

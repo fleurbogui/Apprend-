@@ -46,7 +46,7 @@ Le détail est dans `GUIDE-PROF.md`.
 
 Le site doit être servi en HTTPS. Netlify, Vercel et GitHub Pages conviennent. Les fichiers `netlify.toml` et `vercel.json` ajoutent les en-têtes de sécurité et bloquent l'accès à `.env`, `outils/` et `supabase/`.
 
-Avec Netlify ou Vercel reliés à GitHub, définir `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans les variables d'environnement du site : `config.js` est alors généré à chaque déploiement.
+`config.js` est généré en local à partir de `.env`, puis envoyé sur GitHub avec le reste du code. L'hébergeur publie les fichiers tels quels, sans étape de build. Après un changement de `.env`, relancer `node outils/generer-config.js` avant de pousser.
 
 ## Mises à jour
 
