@@ -94,10 +94,13 @@ Une étape ne rapporte des points qu'une fois par jour, et les étapes faites tr
 
 ## Sécurité
 
-- La clé anon présente dans `config.js` est publique par nature. Elle ne donne accès à aucune table : les élèves passent uniquement par trois fonctions qui contrôlent toutes les valeurs reçues (format des étapes, scores plafonnés, dates bornées, nombre d'envois limité par heure).
+- La clé anon présente dans `config.js` est publique par nature. Elle ne donne accès à aucune table : les élèves passent uniquement par des fonctions qui contrôlent toutes les valeurs reçues (format des étapes, scores plafonnés, dates bornées, nombre d'envois limité par heure).
 - Le tableau de bord n'est accessible qu'aux profs listés dans la table `profs`, avec un e-mail confirmé.
 - Les pages sont protégées par une politique de sécurité du contenu (CSP) qui bloque les scripts extérieurs.
-- La connexion des élèves se fait par prénom seulement. C'est simple pour les enfants, mais un élève qui tape le prénom d'un autre jouera sur son compte, et deux élèves qui ont le même prénom partagent leur progression. Demandez-leur d'écrire le prénom suivi de l'initiale du nom, toujours de la même façon (par exemple `Li W.`).
+- Les élèves se connectent avec leur prénom et un code secret de 4 chiffres, choisi à la première connexion. Les codes trop simples (1234, 0000...) sont refusés. Après 5 codes faux, le compte est bloqué 15 minutes.
+- Si un élève oublie son code : onglet Élèves, fiche de l'élève, Remettre le code à zéro. Il choisira un nouveau code à sa prochaine connexion, et ses autres téléphones seront déconnectés. Sa progression est conservée.
+- Les élèves déjà inscrits avant l'arrivée du code le choisissent à leur prochaine connexion. Tant qu'un élève n'a pas choisi son code, la première personne qui se connecte avec son prénom le choisit : vérifiez dans l'onglet Élèves que chacun a bien un code.
+- Demandez aux élèves d'écrire le prénom suivi de l'initiale du nom, toujours de la même façon (par exemple `Li W.`), pour éviter que deux élèves aient le même prénom.
 
 ## À savoir
 

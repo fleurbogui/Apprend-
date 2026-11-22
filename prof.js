@@ -51,6 +51,7 @@ const ICONES = {
   livre: '<path d="M4 19.5V5a2 2 0 0 1 2-2h14v14H6.5A2.5 2.5 0 0 0 4 19.5zm0 0A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
   eleves: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
   graph: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  cle: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
   trophee: '<path d="M8 4h8v6a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 14v4M8.5 21h7M10 18h4"/>'
 };
 const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n] || ''}</svg>`;
@@ -101,7 +102,8 @@ const Api = {
       if (s) { await this.auth('refresh_token', { refresh_token: s.refresh_token }); return this.requete(chemin, options, 1); }
     }
     if (!r.ok) throw new Error(`Erreur ${r.status} : ${(await r.text()).slice(0, 200)}`);
-    return r.status === 204 ? null : r.json();
+    const texte = await r.text();
+    return texte ? JSON.parse(texte) : null;
   },
 
   // Lit toutes les lignes (Supabase renvoie 1000 lignes max par requête)
@@ -131,7 +133,7 @@ async function charger() {
       const il90j = new Date(Date.now() - 90 * 86400000).toISOString();
       const [profs, eleves, progression, tentatives, devoirs] = await Promise.all([
         Api.requete('profs?select=email'),
-        Api.toutLire('eleves?select=id,nom,cree_le,vu_le&order=nom.asc'),
+        Api.toutLire('eleves?select=id,nom,cree_le,vu_le,code_defini,bloque_jusqu&order=nom.asc'),
         Api.toutLire('progression?select=eleve_id,etape,etoiles,points,fois,maj'),
         Api.toutLire(`tentatives?select=*&fait_le=gte.${encodeURIComponent(il90j)}&order=fait_le.desc`),
         Api.toutLire('devoirs?select=*&order=date_limite.desc')
@@ -508,7 +510,8 @@ function htmlEleves() {
             <td class="nombre">${e.etoiles}</td>
             <td class="nombre">${fmtDuree(e.temps)}</td>
             <td>${e.devoirsEchus ? `<span class="statut ${e.devoirsManques ? 'critique' : 'ok'}">${ico(e.devoirsManques ? 'croix' : 'ok')} ${e.devoirsRendus}/${e.devoirsEchus} rendus</span>` : '<span class="note">—</span>'}</td>
-            <td>${e.suspects.length ? `<span class="statut attention">${ico('eclair')} ${e.suspects.length} à vérifier</span>` : ''}</td>
+            <td>${e.suspects.length ? `<span class="statut attention">${ico('eclair')} ${e.suspects.length} à vérifier</span>` : ''}
+              ${e.code_defini === false ? `<span class="statut neutre" data-tip="Le code sera choisi à la prochaine connexion">${ico('cle')} Pas de code</span>` : ''}</td>
           </tr>`).join('') || '<tr><td colspan="8" class="vide-message">Aucun élève trouvé.</td></tr>'}</tbody>
       </table></div>
     </section>`;
@@ -548,7 +551,14 @@ function ouvrirEleve(id) {
           <td class="nombre">${t.passes}/${t.nb_exercices}</td><td class="nombre">${fmtDuree(t.duree_s)}</td><td><span class="drapeaux">${htmlSignalements(signalements(t))}</span></td></tr>`).join('')}
         </tbody></table></div>` : '<p class="vide-message">Aucune étape terminée pour l\'instant.</p>'}
 
-      <div style="margin-top:20px;display:flex;justify-content:flex-end">
+      <h3>Code secret</h3>
+      <p class="note">${e.bloque_jusqu && new Date(e.bloque_jusqu) > new Date()
+          ? `Compte bloqué jusqu'à ${esc(fmtDateHeure(e.bloque_jusqu))} après 5 codes faux.`
+          : e.code_defini ? 'L\'élève a choisi son code.' : 'Pas encore de code : il sera choisi à la prochaine connexion.'}
+        Si l'élève a oublié son code, remets-le à zéro : il en choisira un nouveau et ses autres téléphones seront déconnectés.</p>
+
+      <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-blanc btn-petit" data-action="code-zero" data-id="${e.id}">${ico('actualiser')} Remettre le code à zéro</button>
         <button class="btn btn-blanc btn-petit" data-action="eleve-supprimer" data-id="${e.id}">${ico('poubelle')} Supprimer cet élève</button></div>
     </div>`;
   $('#fenetre').hidden = false;
@@ -609,6 +619,15 @@ async function supprimerDevoir(id, bouton) {
     analyser(); afficherTableau(); toast('Devoir supprimé');
   } catch (e) { toast('Erreur : ' + e.message); }
 }
+async function remettreCodeAZero(id, bouton) {
+  if (!confirmer('code' + id, bouton, 'Confirmer la remise à zéro ? Clique encore')) return;
+  try {
+    await Api.requete('rpc/prof_reinitialiser_code', { method: 'POST', body: JSON.stringify({ p_eleve: id }) });
+    const e = ETAT.eleves.find((x) => x.id === id);
+    if (e) { e.code_defini = false; e.bloque_jusqu = null; }
+    fermerFenetre(); analyser(); afficherTableau(); toast('Code remis à zéro');
+  } catch (e) { toast('Erreur : ' + e.message); }
+}
 async function supprimerEleve(id, bouton) {
   if (!confirmer('eleve' + id, bouton, 'Supprimer définitivement ? Clique encore')) return;
   try {
@@ -634,6 +653,7 @@ document.addEventListener('click', (ev) => {
     case 'devoir-ouvrir': ETAT.devoirOuvert = String(ETAT.devoirOuvert) === id ? null : (ETAT.devoirs.find((d) => String(d.id) === id) || {}).id; afficherOnglet(); break;
     case 'devoir-supprimer': ev.stopPropagation(); supprimerDevoir(id, el); break;
     case 'eleve-supprimer': supprimerEleve(id, el); break;
+    case 'code-zero': remettreCodeAZero(id, el); break;
     case 'csv': exporterCsv(); break;
   }
 });

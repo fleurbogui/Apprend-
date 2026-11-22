@@ -719,6 +719,9 @@ button.avatar { cursor: pointer; }
 .vide-carnet > .ico { width: 40px; height: 40px; color: var(--rouge); }
 
 /* Connexion */
+.etiquette-code { display: block; margin-top: 14px; font-size: .85rem; font-weight: 650; color: var(--encre); }
+.champ-code { margin-top: 6px; letter-spacing: .5em; text-align: center; font-size: 1.4rem; }
+.champ-code::placeholder { letter-spacing: .3em; }
 .ecran-connexion { min-height: 100vh; min-height: 100dvh; }
 .connexion-haut { padding: calc(40px + var(--sur-haut)) 22px 22px; }
 .connexion-haut .logo { width: 64px; height: 64px; border-radius: 18px; margin-bottom: 22px; box-shadow: 0 12px 24px -12px rgba(168, 23, 29, .7); }

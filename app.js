@@ -152,7 +152,7 @@ const Profils = {
     const cle = cleNom(propre);
     let p = this.data.profils[cle];
     if (!p) {
-      p = { cle, nom: propre, cree: Date.now(), dernier: Date.now(), idServeur: null,
+      p = { cle, nom: propre, cree: Date.now(), dernier: Date.now(), jeton: null, codeLocal: null,
             etapes: {}, historique: [], enAttente: [], devoirs: [], synchro: null };
       // Reprise de la progression de la version 1 (un seul joueur) pour le 1er profil
       try {
@@ -305,11 +305,41 @@ const Sync = {
     } finally { clearTimeout(minuteur); }
   },
 
+  // Fusionne la progression du serveur avec celle du téléphone (meilleur score gardé)
+  fusionner(q, d) {
+    let recuperees = 0;
+    if (Array.isArray(d.devoirs)) q.devoirs = d.devoirs;
+    Object.entries(d.progression || {}).forEach(([k, srv]) => {
+      const loc = q.etapes[k];
+      if (!loc) recuperees++;
+      q.etapes[k] = {
+        etoiles: Math.max(Number(srv.etoiles) || 0, loc ? loc.etoiles : 0),
+        points: Math.max(Number(srv.points) || 0, loc ? loc.points : 0),
+        fois: Math.max(Number(srv.fois) || 0, loc ? loc.fois : 0),
+        date: loc ? loc.date : Date.now()
+      };
+    });
+    return recuperees;
+  },
+
+  // Le serveur ne reconnaît plus le jeton (code remis à zéro par le prof)
+  sessionExpiree(q) {
+    q.jeton = null;
+    q.codeLocal = null;
+    Profils.sauver();
+    if (P() === q) {
+      Profils.deconnecter();
+      messageConnexion = 'Ton prof a remis ton code à zéro. Choisis un nouveau code secret. · 老师重置了你的密码，请设置新密码。';
+      aller('#/', true);
+    }
+  },
+
   // Récupère le classement (top 20 + place de l'élève) et le garde pour le hors-ligne
   async classement(q = P()) {
-    if (!q || !q.idServeur || !this.configure() || navigator.onLine === false) return false;
+    if (!q || !q.jeton || !this.configure() || navigator.onLine === false) return false;
     try {
-      const c = await this.rpc('classement', { p_id: q.idServeur, p_debut: debutSemaine().toISOString() });
+      const c = await this.rpc('classement', { p_jeton: q.jeton, p_debut: debutSemaine().toISOString() });
+      if (c && c.erreur === 'session') { this.sessionExpiree(q); return false; }
       if (!c || !Array.isArray(c.semaine)) return false;
       const propre = (liste) => (Array.isArray(liste) ? liste : []).slice(0, 25).map((x) => ({
         rang: Number(x.rang) || 0, ordre: Number(x.ordre) || 0, score: Number(x.score) || 0,
@@ -330,33 +360,20 @@ const Sync = {
   // Récupère la progression du serveur et envoie les étapes en attente
   async lancer() {
     const p = P();
-    if (!p || !this.configure() || this.enCours || navigator.onLine === false) return;
+    if (!p || !p.jeton || !this.configure() || this.enCours || navigator.onLine === false) return;
     this.enCours = true;
     this.dernierEssai = Date.now();
-    const cle = p.cle;
-    let recuperees = 0;
+    const q = p;
     try {
-      const d = await this.rpc('eleve_connexion', { p_nom: p.nom });
-      const q = Profils.data.profils[cle];
-      if (!q) return;
-      q.idServeur = d.id;
-      q.devoirs = Array.isArray(d.devoirs) ? d.devoirs : [];
-      // On garde le meilleur score entre le téléphone et le serveur
-      Object.entries(d.progression || {}).forEach(([k, s]) => {
-        const loc = q.etapes[k];
-        if (!loc) recuperees++;
-        q.etapes[k] = {
-          etoiles: Math.max(s.etoiles || 0, loc ? loc.etoiles : 0),
-          points: Math.max(s.points || 0, loc ? loc.points : 0),
-          fois: Math.max(s.fois || 0, loc ? loc.fois : 0),
-          date: loc ? loc.date : Date.now()
-        };
-      });
+      const d = await this.rpc('eleve_session', { p_jeton: q.jeton });
+      if (d && d.erreur === 'session') { this.sessionExpiree(q); return; }
+      const recuperees = this.fusionner(q, d || {});
       Profils.sauver();
 
       while (q.enAttente.length) {
         const lot = q.enAttente.slice(0, 50);
-        const r = await this.rpc('eleve_envoyer', { p_id: q.idServeur, p_tentatives: lot });
+        const r = await this.rpc('eleve_envoyer', { p_jeton: q.jeton, p_tentatives: lot });
+        if (r && r.erreur === 'session') { this.sessionExpiree(q); return; }
         const envoyes = new Set(lot.map((t) => t.client_id));
         q.enAttente = q.enAttente.filter((t) => !envoyes.has(t.client_id));
         if (r && Array.isArray(r.devoirs)) q.devoirs = r.devoirs;
@@ -497,7 +514,11 @@ function afficherConnexion() {
         <label for="champ-nom" class="cache">Prénom</label>
         <input id="champ-nom" class="champ" type="text" maxlength="30" placeholder="ex. Li W." enterkeyhint="go"
                autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
-        <p id="erreur-nom" class="erreur-champ" role="alert"></p>
+        <label for="champ-code" class="etiquette-code">Ton code secret (4 chiffres) · 你的4位密码</label>
+        <input id="champ-code" class="champ champ-code" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+               autocomplete="off" placeholder="••••" enterkeyhint="go">
+        <p class="astuce">Première fois ? Choisis 4 chiffres et retiens-les bien. · 第一次登录？请设置4位数字密码并记住它。</p>
+        <p id="erreur-nom" class="erreur-champ" role="alert">${esc(messageConnexion)}</p>
         <button type="submit" class="btn btn-rouge btn-large">C'est parti · 开始 ${ico('fleche')}</button>
       </form>
 
@@ -770,16 +791,83 @@ function afficherNiveau(n) {
     </section>`;
 }
 
-function validerConnexion(nom) {
-  const propre = String(nom || '').replace(/\s+/g, ' ').trim();
+const CODES_FACILES = ['0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1234', '4321', '0123', '9876'];
+let messageConnexion = '';
+let connexionEnCours = false;
+
+// Empreinte du code gardée sur le téléphone, pour pouvoir se reconnecter hors ligne
+async function empreinteCode(cle, code) {
+  if (!window.crypto || !crypto.subtle) return null;
+  const octets = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`apprend-plus|${cle}|${code}`));
+  return Array.from(new Uint8Array(octets), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function erreurConnexion(texte) {
   const erreur = $('#erreur-nom');
+  if (erreur) erreur.textContent = texte;
+  vibrer(60);
+}
+
+async function validerConnexion(nom, code) {
+  if (connexionEnCours) return;
+  const propre = String(nom || '').replace(/\s+/g, ' ').trim();
+  code = String(code || '').trim();
   if (!/^\p{L}[\p{L}\p{M}' .-]{1,29}$/u.test(propre)) {
-    if (erreur) erreur.textContent = 'Écris ton prénom avec des lettres (au moins 2). · 请用字母输入你的名字（至少两个字）。';
-    vibrer(60);
-    return;
+    return erreurConnexion('Écris ton prénom avec des lettres (au moins 2). · 请用字母输入你的名字（至少两个字）。');
   }
-  const p = Profils.ouvrir(propre);
-  toast(`Bienvenue ${esc(p.nom)} ! · 欢迎！`);
+  if (!/^[0-9]{4}$/.test(code)) {
+    return erreurConnexion('Le code secret doit avoir 4 chiffres. · 密码必须是4位数字。');
+  }
+  const cle = cleNom(propre);
+  const local = Profils.data.profils[cle];
+  const empreinte = await empreinteCode(cle, code);
+  const bouton = $('#form-connexion button[type=submit]');
+  connexionEnCours = true;
+  if (bouton) bouton.disabled = true;
+
+  try {
+    if (Sync.configure()) {
+      let r;
+      try {
+        r = await Sync.rpc('eleve_connexion', { p_nom: propre, p_code: code });
+      } catch (e) {
+        // Pas de réseau : on accepte seulement un élève déjà connecté sur ce téléphone avec ce code
+        if (local && local.jeton && local.codeLocal && local.codeLocal === empreinte) return ouvrirSession(propre, {});
+        return erreurConnexion('Pas de connexion Internet. La première connexion sur ce téléphone a besoin d\'Internet. · 首次登录需要联网。');
+      }
+      const messages = {
+        nom: 'Ce prénom n\'est pas accepté. · 这个名字无效。',
+        format: 'Le code secret doit avoir 4 chiffres. · 密码必须是4位数字。',
+        facile: 'Ce code est trop facile à deviner. Choisis-en un autre. · 密码太简单了，请换一个。',
+        trop: 'Trop d\'inscriptions en ce moment. Réessaie plus tard. · 请稍后再试。',
+        code: `Code incorrect. Encore ${Number(r && r.restants) || 0} essai(s). · 密码错误。`,
+        bloque: `Trop d'essais. Réessaie dans ${Number(r && r.minutes) || 15} minutes, ou demande à ton prof. · 尝试次数太多，请稍后再试。`
+      };
+      if (!r || r.erreur) return erreurConnexion(messages[r && r.erreur] || 'Connexion impossible. Réessaie. · 登录失败，请重试。');
+      return ouvrirSession(propre, { jeton: String(r.jeton || ''), empreinte, donnees: r, nouveau: !!r.nouveau });
+    }
+
+    // Sans serveur : le code protège seulement ce téléphone
+    if (local && local.codeLocal) {
+      if (local.codeLocal !== empreinte) return erreurConnexion('Code incorrect. · 密码错误。');
+    } else if (CODES_FACILES.includes(code)) {
+      return erreurConnexion('Ce code est trop facile à deviner. Choisis-en un autre. · 密码太简单了，请换一个。');
+    }
+    return ouvrirSession(propre, { empreinte });
+  } finally {
+    connexionEnCours = false;
+    if (bouton) bouton.disabled = false;
+  }
+}
+
+function ouvrirSession(nom, { jeton, empreinte, donnees, nouveau } = {}) {
+  const p = Profils.ouvrir(nom);
+  if (jeton) p.jeton = jeton;
+  if (empreinte) p.codeLocal = empreinte;
+  if (donnees) Sync.fusionner(p, donnees);
+  Profils.sauver();
+  messageConnexion = '';
+  toast(nouveau ? `Bienvenue ${esc(p.nom)} ! Retiens bien ton code. · 欢迎！请记住你的密码。` : `Bon retour ${esc(p.nom)} ! · 欢迎回来！`);
   aller('#/', true);
   Sync.lancer();
 }
@@ -1434,7 +1522,7 @@ function ouvrirMenuProfil() {
       <button type="button" class="btn btn-rouge btn-large" data-action="fermer-modale">Fermer · 关闭</button>
     </div>
     <p style="font-size:.78rem;color:var(--encre-douce);margin-top:12px;text-align:center">
-      Ta progression n'est jamais effacée : retape ton prénom pour la retrouver.<br><span lang="zh">进度不会丢失：再次输入名字即可找回。</span></p>`);
+      Ta progression n'est jamais effacée : retape ton prénom et ton code secret pour la retrouver.<br><span lang="zh">进度不会丢失：再次输入名字和密码即可找回。</span></p>`);
 }
 
 function ouvrirAide() {
@@ -1496,7 +1584,7 @@ document.addEventListener('click', (ev) => {
   switch (action) {
     case 'profil-choisir': {
       const p = Profils.data.profils[el.dataset.cle];
-      if (p) validerConnexion(p.nom);
+      if (p) { $('#champ-nom').value = p.nom; $('#champ-code').value = ''; $('#champ-code').focus(); }
       break;
     }
     case 'menu-profil': ouvrirMenuProfil(); break;
@@ -1550,7 +1638,7 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('submit', (ev) => {
   if (ev.target.id === 'form-connexion') {
     ev.preventDefault();
-    validerConnexion($('#champ-nom').value);
+    validerConnexion($('#champ-nom').value, $('#champ-code').value);
   }
 });
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') fermerModale(); });
@@ -1608,5 +1696,9 @@ window.addEventListener('popstate', () => { router(); essayerMiseAJour(); });
 try {
   if (sessionStorage.getItem('maj-faite')) { sessionStorage.removeItem('maj-faite'); setTimeout(() => toast('Appli mise à jour · 已更新'), 600); }
 } catch (e) {}
+if (Sync.configure() && P() && !P().jeton) {
+  Profils.deconnecter();
+  messageConnexion = 'Nouveau : protège ton compte avec un code secret de 4 chiffres. Ta progression est gardée. · 请设置4位密码保护你的账号，进度不会丢失。';
+}
 router();
 Sync.lancer();

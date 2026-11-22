@@ -2,7 +2,7 @@
 
 Application web pour apprendre le vocabulaire français, destinée à des élèves chinois. Elle s'installe sur iPhone et Android comme une application (PWA) et fonctionne hors connexion.
 
-Les élèves se connectent avec leur prénom. Un projet Supabase, facultatif, permet de garder la progression d'un téléphone à l'autre et donne accès au tableau de bord des profs (devoirs, suivi, classement).
+Les élèves se connectent avec leur prénom et un code secret de 4 chiffres. Un projet Supabase, facultatif, permet de garder la progression d'un téléphone à l'autre et donne accès au tableau de bord des profs (devoirs, suivi, classement).
 
 ## Contenu
 
@@ -60,13 +60,15 @@ Les niveaux sont décrits dans `data.js`. Chaque niveau a un `id` qui ne doit ja
 
 ## Sécurité
 
-- Aucune table n'est lisible avec la clé publique. Les élèves passent par trois fonctions SQL qui valident les données : format des étapes, scores plafonnés, dates bornées, nombre d'envois limité par heure.
+- Chaque élève a un code secret de 4 chiffres, gardé haché (bcrypt) sur le serveur. Après 5 codes faux, le compte est bloqué 15 minutes. Le prof peut remettre un code à zéro depuis le tableau de bord.
+- Une fois connecté, le téléphone utilise un jeton de session aléatoire. Le serveur n'en garde que l'empreinte SHA-256, et une remise à zéro du code déconnecte tous les téléphones de l'élève.
+- Aucune table n'est lisible avec la clé publique. Les élèves passent par des fonctions SQL qui valident les données : format des étapes, scores plafonnés, dates bornées, nombre d'envois limité par heure.
 - Le tableau de bord est réservé aux comptes listés dans la table `profs`, avec un e-mail confirmé.
 - Une politique de sécurité du contenu (CSP) n'autorise que les scripts du site et les appels vers Supabase.
 - Les noms affichés sont échappés, et l'export CSV neutralise les cellules qui pourraient être lues comme des formules.
 - `.env` n'est ni versionné ni servi. Il ne doit contenir que la clé anon, jamais la clé service_role.
 
-Limite connue : la connexion par prénom ne protège pas un compte élève contre quelqu'un qui connaît ce prénom. C'est un choix de simplicité pour de jeunes élèves.
+Limite connue : un code de 4 chiffres reste court. Le blocage après 5 essais rend sa recherche très lente, mais un élève qui voit un camarade taper son code peut s'en servir. Dans ce cas, le prof remet le code à zéro.
 
 ## Licences des photos
 
