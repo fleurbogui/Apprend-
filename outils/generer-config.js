@@ -31,6 +31,12 @@ const env = depuisFichier ? lireEnv(fichierEnv) : process.env;
 const url = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
 const cle = String(env.SUPABASE_ANON_KEY || '').trim();
 
+// Sur un hébergeur sans variables définies, on garde le config.js du dépôt
+if (!depuisFichier && !url && !cle && fs.existsSync(fichierConfig)) {
+  console.log('Aucune variable SUPABASE_* : config.js est conservé tel quel.');
+  process.exit(0);
+}
+
 // Vérifications
 if (url && !/^https:\/\/[a-z0-9.-]+$/i.test(url)) {
   arreter(`SUPABASE_URL n'est pas valide : « ${url} »\n   Elle doit ressembler à https://abcdxyz.supabase.co`);
