@@ -1,0 +1,33 @@
+# Configuration Netlify (facultative)
+# • Site relié à GitHub : la commande ci-dessous crée config.js à partir des
+#   variables SUPABASE_URL et SUPABASE_ANON_KEY saisies dans Netlify
+#   (Site configuration → Environment variables).
+# • Dépôt par glisser-déposer (app.netlify.com/drop) : aucune commande n'est
+#   lancée, lance donc « node outils/generer-config.js » sur ton ordinateur avant.
+[build]
+  publish = "."
+  command = "node outils/generer-config.js"
+
+# Le fichier .env n'est jamais servi, même s'il est déposé avec le dossier
+[[redirects]]
+  from = "/.env"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.env.example"
+  to = "/404"
+  status = 404
+  force = true
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Type = "application/manifest+json"

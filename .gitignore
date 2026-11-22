@@ -1,0 +1,4 @@
+# Variables privées : ne jamais les mettre sur GitHub
+.env
+.env.*
+!.env.example
