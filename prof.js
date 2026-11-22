@@ -253,7 +253,7 @@ function afficherConnexion(message = '') {
     <div class="page-connexion">
       <div class="haut vichy">
         <h1 class="titre-jeu">Espace prof</h1>
-        <p>Le Français en Aventures · 教师空间</p>
+        <p>Apprend+ · 教师空间</p>
       </div>
       <div class="auvent"></div>
       <form class="carte-login" id="form-login" novalidate>
@@ -281,7 +281,7 @@ function afficherTableau() {
     <header class="entete vichy">
       <div class="ligne">
         <img class="logo" src="icons/icon-192.png" alt="">
-        <h1 class="titre-jeu">Espace prof<small>Le Français en Aventures · ${esc(ETAT.email)}</small></h1>
+        <h1 class="titre-jeu">Espace prof<small>Apprend+ · ${esc(ETAT.email)}</small></h1>
         <button class="btn btn-transparent btn-petit" data-action="recharger">${ico('actualiser')} Actualiser</button>
         <button class="btn btn-transparent btn-petit" data-action="deconnexion">${ico('sortir')} Déconnexion</button>
       </div>

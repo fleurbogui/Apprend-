@@ -10,7 +10,7 @@ Comptez environ 15 minutes, à faire une seule fois.
 
 1. Créer un compte sur https://supabase.com.
 2. Créer un projet (New project) :
-   - Name : `francais-aventures`
+   - Name : `apprend-plus`
    - Database password : à noter, il ne sera pas redemandé
    - Region : la plus proche des élèves (Northeast Asia (Tokyo) pour la Chine, West EU (Paris) pour la France)
 3. Attendre une à deux minutes que le projet soit prêt.

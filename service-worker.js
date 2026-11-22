@@ -1,8 +1,8 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors ligne.
 // Il doit rester à la racine du site. Augmenter VERSION à chaque mise en ligne.
 
-const VERSION = 'v2.6.0';
-const NOM_CACHE = 'francais-aventures-' + VERSION;
+const VERSION = 'v2.7.0';
+const NOM_CACHE = 'apprend-plus-' + VERSION;
 
 // La liste des photos est lue dans data.js.
 importScripts('./data.js');
@@ -42,7 +42,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((noms) => Promise.all(
-        noms.filter((nom) => nom.startsWith('francais-aventures-') && nom !== NOM_CACHE)
+        noms.filter((nom) => /^(apprend-plus|francais-aventures)-/.test(nom) && nom !== NOM_CACHE)
             .map((nom) => caches.delete(nom))
       ))
       .then(() => self.clients.claim())

@@ -1,4 +1,4 @@
--- Installation de la base Supabase pour Le Français en Aventures.
+-- Installation de la base Supabase pour Apprend+.
 --
 -- 1. Remplacer l'adresse e-mail de la table profs par celle du prof.
 -- 2. Coller tout le fichier dans Supabase, SQL Editor, puis Run.

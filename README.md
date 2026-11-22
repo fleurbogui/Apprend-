@@ -1,4 +1,4 @@
-# Le Français en Aventures
+# Apprend+
 
 Application web pour apprendre le vocabulaire français, destinée à des élèves chinois. Elle s'installe sur iPhone et Android comme une application (PWA) et fonctionne hors connexion.
 

@@ -1,4 +1,4 @@
-// Le Français en Aventures : application des élèves.
+// Apprend+ : application des élèves.
 // Routes : #/ (accueil), #/parcours, #/carnet, #/classement, #/niveau/N,
 // #/etape/N/E, #/resultat/N/E, #/credits. N et E commencent à 0.
 // Les profils sont gardés dans localStorage, même après déconnexion.
@@ -486,7 +486,7 @@ function afficherConnexion() {
       <div class="connexion-haut">
         <img class="logo" src="icons/icon-192.png" alt="">
         ${htmlSurtitre('Bienvenue', '欢迎')}
-        <h1>Le Français<br>en Aventures ${DECO}</h1>
+        <h1>Apprend+ ${DECO}</h1>
         <p>Apprends le français en t'amusant ! <span lang="zh">轻松学法语！</span></p>
       </div>
 
