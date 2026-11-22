@@ -161,20 +161,9 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .avatar.grand { width: 64px; height: 64px; font-size: 1.7rem; }
 
 /* Devoirs */
-.devoir { padding: 12px 0; border-top: 1px solid var(--ligne); }
-.devoir-titre { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; }
-.devoir-titre b { font-family: var(--police-titre); font-size: 1rem; font-weight: 650; }
 .echeance { font-size: .75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--rose); color: var(--rouge-fonce); white-space: nowrap; }
 .echeance.urgent { background: var(--rouge); color: var(--blanc); }
 .echeance.fini { background: var(--vert-pale); color: var(--vert-fonce); }
-.devoir-etapes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.chip-etape {
-  min-height: 40px; padding: 6px 12px; border-radius: 12px;
-  font-weight: 650; font-size: .85rem; display: inline-flex; align-items: center; gap: 6px;
-  background: var(--rose-pale); color: var(--rouge-fonce); border: 1.5px solid var(--rose);
-}
-.chip-etape.fait { background: var(--vert-pale); color: var(--vert-fonce); border-color: #BFE8CE; }
-.chip-etape .ico { width: 16px; height: 16px; }
 
 /* Parcours sinueux */
 
@@ -606,30 +595,12 @@ button.avatar { cursor: pointer; }
 }
 .surtitre i { width: 7px; height: 7px; border-radius: 50%; background: var(--rouge); flex-shrink: 0; }
 .surtitre span { letter-spacing: .04em; font-weight: 600; }
-.deco { width: 22px; height: 22px; stroke: var(--rouge); stroke-width: 2.2; stroke-linecap: round; fill: none; display: inline-block; vertical-align: .05em; }
 .salut, .titre-page {
   font-family: var(--police-titre); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-top: 10px;
 }
 .salut { font-size: 2.1rem; }
 .titre-page { font-size: 1.85rem; }
 .sous-salut { margin-top: 6px; color: var(--encre-douce); font-size: .95rem; }
-
-
-/* Semaine */
-.semaine { margin-top: 22px; padding: 14px 16px 16px; }
-.semaine-titre { display: flex; justify-content: space-between; font-size: .7rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; color: var(--encre-douce); }
-.semaine-titre span:last-child { letter-spacing: .04em; }
-.semaine ol { list-style: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; text-align: center; }
-.semaine li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .72rem; font-weight: 650; color: var(--encre-douce); }
-.semaine li b {
-  width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; font-weight: 650; color: #B8A8A6; background: var(--creme); border: 1px solid var(--ligne);
-}
-.semaine li.fait b { background: var(--rose-pale); border-color: var(--rose); color: var(--rouge); }
-.semaine li b .ico { width: 16px; height: 16px; stroke-width: 2.6; }
-.semaine li.aujourdhui b { background: var(--rouge); border-color: var(--rouge); color: var(--blanc); font-weight: 750; box-shadow: 0 6px 14px -6px rgba(168, 23, 29, .7); }
-.semaine li.aujourdhui span { color: var(--rouge); }
-.semaine li.passe b { color: #C9BAB8; }
 
 /* Leçon du jour */
 .lecon {
@@ -641,8 +612,6 @@ button.avatar { cursor: pointer; }
 .lecon h2 { font-family: var(--police-titre); font-weight: 500; font-size: 1.65rem; letter-spacing: -.03em; line-height: 1.15; margin-top: 12px; }
 .lecon p { margin-top: 8px; color: var(--encre-douce); font-size: .9rem; line-height: 1.45; }
 .lecon .btn { margin-top: 16px; min-height: 46px; padding: 10px 18px; font-size: .95rem; }
-.lecon-progres { display: flex; align-items: center; gap: 10px; margin-top: 16px; width: 100%; }
-.lecon-progres small { font-size: .75rem; color: var(--encre-douce); font-weight: 600; white-space: nowrap; }
 .mini-jauge { flex: 1; height: 5px; border-radius: 999px; background: rgba(168, 23, 29, .12); overflow: hidden; min-width: 40px; display: block; }
 .mini-jauge > span { display: block; height: 100%; border-radius: inherit; background: var(--rouge); min-width: 4px; }
 .lecon-photos { position: relative; flex: 1; min-width: 110px; }
@@ -654,52 +623,29 @@ button.avatar { cursor: pointer; }
 .lecon-photos .b1 { width: 78px; height: 78px; right: 30px; top: 6px; animation: flotte 6s ease-in-out infinite; }
 .lecon-photos .b2 { width: 66px; height: 66px; right: 66px; top: 96px; animation: flotte 7s ease-in-out -2s infinite; }
 .lecon-photos .b3 { width: 58px; height: 58px; right: -4px; top: 118px; animation: flotte 6.5s ease-in-out -4s infinite; }
-.lecon-photos .deco { position: absolute; right: -6px; top: 70px; width: 20px; height: 20px; }
-.lecon-tampon {
-  position: absolute; right: 12px; bottom: 12px; z-index: 2; text-align: right;
-  font-size: .6rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--rouge-fonce); opacity: .7;
-  transform: rotate(-8deg);
-}
-.lecon.fini { display: block; min-height: 0; }
-.lecon.fini h2 { font-weight: 600; }
 @keyframes flotte { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-/* Devoirs */
-.devoirs { margin-top: 16px; padding: 16px 16px 4px; }
-.devoirs-titre { padding-bottom: 10px; }
-
-/* Ton voyage */
-.entete-section { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 28px; }
-.entete-section h2 { font-family: var(--police-titre); font-weight: 500; font-size: 1.4rem; letter-spacing: -.02em; margin-top: 6px; }
+/* Liens */
 .lien { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; font-weight: 650; font-size: .88rem; color: var(--encre); white-space: nowrap; }
 .lien .ico { width: 16px; height: 16px; }
-.grille-niveaux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-.carte-niveau {
-  position: relative; text-align: left; display: flex; flex-direction: column; min-width: 0;
-  padding: 14px; border-radius: 20px; background: var(--blanc); border: 1px solid var(--ligne);
-  transition: transform .1s ease;
+
+/* Accueil */
+.message-jour { margin-top: 10px; font-size: 1.05rem; line-height: 1.5; color: var(--encre); }
+.message-jour span { display: block; margin-top: 4px; font-size: .9rem; color: var(--encre-douce); }
+.accueil .lecon { margin-top: 22px; min-height: 190px; }
+.devoir-carte { margin-top: 20px; padding: 16px; display: flex; align-items: center; gap: 14px; border-color: var(--rose); }
+.devoir-carte > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.devoir-carte b { font-family: var(--police-titre); font-weight: 650; font-size: 1.05rem; margin-top: 4px; }
+.devoir-carte small { color: var(--encre-douce); font-size: .8rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.resume { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+.resume li {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 12px; background: var(--blanc); border: 1px solid var(--ligne); border-radius: 18px;
 }
-.carte-niveau:active { transform: scale(.98); }
-.carte-niveau.termine { background: var(--rose-pale); border-color: var(--rose); }
-.carte-niveau.actuel { background: var(--blanc); border: 1.5px solid var(--rouge); box-shadow: 0 10px 24px -14px rgba(168, 23, 29, .6); }
-.carte-niveau.verrouille { background: #F3EFEC; border-color: #ECE5E1; }
-.carte-niveau.verrouille > *:not(.cn-haut), .carte-niveau.verrouille img { opacity: .55; }
-.carte-niveau.verrouille img { filter: grayscale(1); }
-.cn-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; min-height: 44px; }
-.cn-haut img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--blanc); box-shadow: 0 4px 10px -6px rgba(38, 26, 27, .5); }
-.cn-haut .emoji { font-size: 1.8rem; }
-.puce { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.puce .ico { width: 11px; height: 11px; stroke-width: 3; }
-.puce.ok { background: var(--blanc); color: var(--rouge-fonce); border: 1px solid var(--rose); }
-.puce.encours { background: var(--rose); color: var(--rouge-fonce); }
-.cadenas { color: #B3A4A1; }
-.cadenas .ico { width: 18px; height: 18px; }
-.carte-niveau b { margin-top: 14px; font-family: var(--police-titre); font-weight: 600; font-size: 1rem; line-height: 1.2; }
-.carte-niveau .zh { font-size: .78rem; color: var(--encre-douce); margin-top: 2px; }
-.cn-bas { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 14px; font-size: .72rem; font-weight: 650; color: var(--encre-douce); }
-.cn-bas .etoiles-mini { display: inline-flex; align-items: center; gap: 3px; }
-.cn-bas .etoiles-mini .ico { width: 13px; height: 13px; }
-.cn-bas > span:last-child { margin-left: auto; }
+.resume .ico { width: 20px; height: 20px; margin-bottom: 4px; }
+.resume b { font-size: 1.3rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.resume span { font-size: .75rem; color: var(--encre-douce); font-weight: 600; }
+.lien-parcours { align-self: center; margin-top: 14px; color: var(--encre-douce); }
 
 /* Parcours */
 .progres-global { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding: 14px 16px; }

@@ -462,7 +462,6 @@ function htmlNav(actif) {
 const htmlSurtitre = (fr, zh, point = true) =>
   `<p class="surtitre">${point ? '<i></i>' : ''}${esc(fr)}${zh ? ` <span lang="zh">· ${esc(zh)}</span>` : ''}</p>`;
 
-const DECO = '<svg class="deco" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1"/></svg>';
 
 // Prochaine étape à jouer : [n, e] (ou null si tout est terminé)
 function prochaineEtape() {
@@ -486,7 +485,7 @@ function afficherConnexion() {
       <div class="connexion-haut">
         <img class="logo" src="icons/icon-192.png" alt="">
         ${htmlSurtitre('Bienvenue', '欢迎')}
-        <h1>Apprend+ ${DECO}</h1>
+        <h1>Apprend+</h1>
         <p>Apprends le français en t'amusant ! <span lang="zh">轻松学法语！</span></p>
       </div>
 
@@ -516,143 +515,110 @@ function afficherConnexion() {
 }
 
 // Accueil
-function htmlSemaine() {
-  const jours = new Set((P().historique || []).map((h) => jourLocal(h.fait_le)));
-  const lundi = debutSemaine();
-  const auj = jourLocal();
-  const lettres = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-  return `
-    <div class="carte semaine">
-      <div class="semaine-titre"><span>Cette semaine</span><span lang="zh">本周</span></div>
-      <ol>
-        ${lettres.map((l, i) => {
-          const d = new Date(lundi); d.setDate(d.getDate() + i);
-          const j = jourLocal(d);
-          const fait = jours.has(j);
-          const classe = j === auj ? 'aujourdhui' : fait ? 'fait' : j > auj ? 'futur' : 'passe';
-          return `<li class="${classe}${fait ? ' fait' : ''}"><span>${l}</span>
-            <b aria-label="${fait ? 'jour travaillé' : ''}">${fait && j !== auj ? ico('coche') : d.getDate()}</b></li>`;
-        }).join('')}
-      </ol>
-    </div>`;
+function motsAppris() {
+  return NIVEAUX.reduce((s, niv, n) => s + niv.etapes.reduce((t, etape, e) => t + (etapeTerminee(n, e) ? etape.length : 0), 0), 0);
 }
 
-function htmlLeconDuJour() {
-  const suite = prochaineEtape();
-  if (!suite) {
-    return `
-      <div class="lecon fini">
-        ${htmlSurtitre('Bravo', '太棒了', false)}
-        <h2>Tu as terminé toute l'aventure !</h2>
-        <p>Rejoue les étapes pour gagner 3 étoiles partout.<br><span lang="zh">再玩一次，争取每关三颗星！</span></p>
-        <button type="button" class="btn btn-rouge" data-action="onglet" data-hash="#/parcours">Voir mon parcours ${ico('fleche')}</button>
-      </div>`;
+// Phrase qui dit à l'élève ce qu'il peut faire aujourd'hui
+function messageDuJour(devoir, suite) {
+  const faites = etapesFaites();
+  const serie = serieJours();
+  const aJoueAujourdhui = (P().historique || []).some((h) => jourLocal(h.fait_le) === jourLocal());
+  if (devoir) {
+    const quand = devoir.jours < 0 ? 'il est en retard' : devoir.jours === 0 ? 'à rendre aujourd\'hui'
+      : devoir.jours === 1 ? 'à rendre demain' : `à rendre dans ${devoir.jours} jours`;
+    return {
+      fr: `Ton prof t'a donné un devoir : « ${devoir.titre} », ${quand}. Commence par lui !`,
+      zh: `老师布置了作业：“${devoir.titre}”。先完成作业吧！`
+    };
   }
+  if (!suite) {
+    return { fr: 'Tu as fini toutes les leçons. Rejoue-les pour gagner 3 étoiles partout !', zh: '你已经学完所有课程了！再玩一次，争取每关三颗星。' };
+  }
+  const [n, e] = suite;
+  const nb = NIVEAUX[n].etapes[e].length;
+  const nom = bilingue(NIVEAUX[n].nom);
+  if (faites === 0) {
+    return {
+      fr: `Bienvenue ! Ici, tu apprends des mots français grâce à des photos. Ta première leçon compte ${nb} mots et dure environ 3 minutes.`,
+      zh: `欢迎！在这里你可以通过图片学习法语单词。第一课有${nb}个单词，大约需要3分钟。`
+    };
+  }
+  if (aJoueAujourdhui) {
+    return { fr: `Bravo, tu as déjà travaillé aujourd'hui ! Tu veux apprendre ${nb} mots de plus ?`, zh: `今天已经学习过了，真棒！要不要再学${nb}个单词？` };
+  }
+  if (serie >= 2) {
+    return { fr: `Tu as travaillé ${serie} jours de suite. Fais une leçon aujourd'hui pour garder ta série !`, zh: `你已经连续学习${serie}天了，今天也来一课吧！` };
+  }
+  return { fr: `Aujourd'hui, tu vas apprendre ${nb} nouveaux mots sur le thème « ${nom.fr} ».`, zh: `今天你将学习${nb}个新单词，主题是“${nom.zh}”。` };
+}
+
+function htmlLeconDuJour(suite) {
+  if (!suite) return '';
   const [n, e] = suite;
   const niv = NIVEAUX[n];
   const nom = bilingue(niv.nom);
-  const total = niv.etapes.length;
-  const faites = etapesFaitesNiveau(n);
   const photos = niv.etapes[e].filter((x) => estImage(x.image)).slice(0, 3);
+  const debut = etapesFaitesNiveau(n) === 0 && e === 0;
   return `
     <div class="lecon">
       <div class="lecon-texte">
-        ${htmlSurtitre('Leçon du jour', '今日课程', false)}
+        ${htmlSurtitre(`Niveau ${n + 1} · étape ${e + 1}`, `第${n + 1}关`, false)}
         <h2>${esc(nom.fr)}</h2>
-        <p>Étape ${e + 1} · ${niv.etapes[e].length} mots à découvrir<br><span lang="zh">${esc(nom.zh)} · ${niv.etapes[e].length}个新单词</span></p>
+        <p lang="zh">${esc(nom.zh)}</p>
         <button type="button" class="btn btn-rouge" data-action="etape" data-n="${n}" data-e="${e}">
-          ${faites || e ? 'Continuer ma leçon' : 'Commencer'} ${ico('fleche')}</button>
-        <div class="lecon-progres">
-          <div class="mini-jauge"><span style="width:${Math.round((faites / total) * 100)}%"></span></div>
-          <small>${faites} / ${total} étapes</small>
-        </div>
+          ${debut ? 'Commencer · 开始' : 'Continuer · 继续'} ${ico('fleche')}</button>
       </div>
       <div class="lecon-photos" aria-hidden="true">
         <span class="halo"></span>
         ${photos.map((x, i) => `<img class="bulle b${i + 1}" src="${esc(x.image)}" alt="" loading="lazy" decoding="async">`).join('')}
-        ${DECO}
       </div>
-      <span class="lecon-tampon" aria-hidden="true">Niveau ${n + 1}<br>第${n + 1}关</span>
     </div>`;
 }
 
-function htmlCarteNiveau(n) {
-  const niv = NIVEAUX[n];
-  const nom = bilingue(niv.nom);
-  const ouvert = niveauDebloque(n);
-  const termine = niveauTermine(n);
-  const faites = etapesFaitesNiveau(n);
-  const total = niv.etapes.length;
-  const suite = prochaineEtape();
-  const actuel = suite && suite[0] === n;
-  const etat = termine ? 'termine' : actuel ? 'actuel' : ouvert ? 'ouvert' : 'verrouille';
-  const puce = termine ? `<span class="puce ok">${ico('coche')} Terminé</span>`
-    : actuel ? `<span class="puce encours">Étape ${suite[1] + 1}</span>`
-    : !ouvert ? `<span class="cadenas">${ico('cadenas')}</span>` : '';
-  const couv = couvertureNiveau(n);
+function htmlDevoir(d) {
+  const reste = d.etapes.filter((k) => !d.faites.includes(k));
+  const [n, e] = indexDeCle(reste[0] || d.etapes[0]);
   return `
-    <button type="button" class="carte-niveau ${etat}" data-action="niveau" data-n="${n}" aria-label="Niveau ${n + 1} : ${esc(nom.fr)}">
-      <div class="cn-haut">
-        ${estImage(couv) ? `<img src="${esc(couv)}" alt="" loading="lazy" decoding="async">` : `<span class="emoji">${esc(couv)}</span>`}
-        ${puce}
+    <div class="carte devoir-carte">
+      <div>
+        ${htmlSurtitre('Devoir', '作业')}
+        <b>${esc(d.titre)}</b>
+        <small>${d.faites.length} / ${d.etapes.length} étapes faites · <span class="echeance ${texteEcheance(d).classe}">${texteEcheance(d).texte}</span></small>
       </div>
-      <b>${esc(nom.fr)}</b>
-      <span class="zh" lang="zh">${esc(nom.zh)}</span>
-      <div class="cn-bas">
-        <span class="etoiles-mini">${ico('etoile', 'etoile-or')} ${etoilesNiveau(n)}/${total * 3}</span>
-        ${actuel ? `<span class="mini-jauge"><span style="width:${Math.round((faites / total) * 100)}%"></span></span>` : ''}
-        <span>${faites}/${total}</span>
-      </div>
-    </button>`;
+      <button type="button" class="btn btn-rouge btn-petit" data-action="etape" data-n="${n}" data-e="${e}">Faire · 去做</button>
+    </div>`;
 }
 
 function afficherAccueil() {
   ecranActuel = 'accueil';
   session = null;
   const p = P();
-  const devoirs = devoirsAffiches();
-  // Sur l'accueil : 4 niveaux autour du niveau en cours ; tous dans « Parcours »
+  const devoir = devoirsAffiches().find((d) => !d.fini) || null;
   const suite = prochaineEtape();
-  const centre = suite ? suite[0] : NIVEAUX.length - 1;
-  const debut = Math.max(0, Math.min(centre - 1, NIVEAUX.length - 4));
-  const apercu = NIVEAUX.map((_, n) => n).slice(debut, debut + 4);
+  const message = messageDuJour(devoir, suite);
+  const serie = serieJours();
+  const mots = motsAppris();
 
   $('#app').innerHTML = `
     <section class="ecran avec-nav">
       ${htmlBarreHaut('Accueil')}
-      <div class="page">
-        ${htmlSurtitre('Ton petit rendez-vous du jour', '今日学习')}
-        <h1 class="salut">你好, ${esc(p.nom)} ${DECO}</h1>
-        <p class="sous-salut">On apprend quelques mots de français ? <span lang="zh">准备好学习法语了吗？</span></p>
+      <div class="page accueil">
+        ${htmlSurtitre('Aujourd\'hui', '今天')}
+        <h1 class="salut">你好, ${esc(p.nom)}</h1>
+        <p class="message-jour">${esc(message.fr)}<span lang="zh">${esc(message.zh)}</span></p>
 
-        ${htmlSemaine()}
-        ${htmlLeconDuJour()}
+        ${devoir ? htmlDevoir(devoir) : ''}
+        ${htmlLeconDuJour(suite)}
 
-        ${devoirs.length ? `
-        <section class="carte devoirs">
-          <div class="devoirs-titre">${htmlSurtitre('Devoirs de ton prof', '老师布置的作业')}</div>
-          ${devoirs.map((d) => {
-            const ech = texteEcheance(d);
-            return `
-            <div class="devoir">
-              <div class="devoir-titre"><b>${esc(d.titre)}</b><span class="echeance ${ech.classe}">${ech.texte}</span></div>
-              <div class="devoir-etapes">
-                ${d.etapes.map((k) => {
-                  const [n, e] = indexDeCle(k);
-                  const fait = d.faites.includes(k);
-                  return `<button type="button" class="chip-etape ${fait ? 'fait' : ''}" data-action="etape" data-n="${n}" data-e="${e}">
-                    ${ico(fait ? 'coche' : 'jouer')} Niv. ${n + 1} · Étape ${e + 1}</button>`;
-                }).join('')}
-              </div>
-            </div>`;
-          }).join('')}
-        </section>` : ''}
+        <ul class="resume">
+          <li>${ico('flamme', 'flamme')}<b>${serie}</b><span>jour${serie > 1 ? 's' : ''} de suite</span></li>
+          <li>${ico('etoile', 'etoile-or')}<b>${totalEtoiles()}</b><span>étoiles</span></li>
+          <li>${ico('livre')}<b>${mots}</b><span>mots appris</span></li>
+        </ul>
 
-        <div class="entete-section">
-          <div>${htmlSurtitre('Ton voyage', '你的学习之旅', false)}<h2>Un pas après l'autre</h2></div>
-          <button type="button" class="lien" data-action="onglet" data-hash="#/parcours">Tout le parcours ${ico('fleche')}</button>
-        </div>
-        <div class="grille-niveaux">${apercu.map(htmlCarteNiveau).join('')}</div>
+        <button type="button" class="lien lien-parcours" data-action="onglet" data-hash="#/parcours">
+          Voir tout le parcours · ${etapesFaites()} / ${totalEtapes()} étapes ${ico('fleche')}</button>
       </div>
       ${htmlNav('#/')}
     </section>`;
