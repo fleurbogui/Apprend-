@@ -1,108 +1,107 @@
-# 👩‍🏫 Guide prof — brancher le serveur et suivre ses élèves
+# Guide prof
 
-Sans serveur, l'appli fonctionne, mais la progression reste sur chaque téléphone et le tableau de bord est vide.
-Avec **Supabase** (gratuit), les élèves retrouvent leur progression sur n'importe quel téléphone, et le prof voit tout sur `prof.html`.
+Ce guide explique comment relier l'application à Supabase et comment utiliser le tableau de bord.
 
-Durée : environ 15 minutes, une seule fois.
+Sans serveur, l'application fonctionne, mais la progression reste sur chaque téléphone et le tableau de bord ne montre rien. Avec Supabase (offre gratuite), les élèves retrouvent leur progression sur n'importe quel téléphone et le prof suit tout depuis `prof.html`.
 
----
+Comptez environ 15 minutes, à faire une seule fois.
 
 ## 1. Créer le projet Supabase
 
-1. Va sur <https://supabase.com> → **Start your project** → crée un compte.
-2. **New project** :
-   - *Name* : `francais-aventures`
-   - *Database password* : choisis-en un et garde-le (il ne sera pas demandé ailleurs)
-   - *Region* : la plus proche de tes élèves (ex. *Northeast Asia (Tokyo)* pour la Chine, *West EU (Paris)* pour la France)
-3. Attends 1 à 2 minutes que le projet soit prêt.
+1. Créer un compte sur https://supabase.com.
+2. Créer un projet (New project) :
+   - Name : `francais-aventures`
+   - Database password : à noter, il ne sera pas redemandé
+   - Region : la plus proche des élèves (Northeast Asia (Tokyo) pour la Chine, West EU (Paris) pour la France)
+3. Attendre une à deux minutes que le projet soit prêt.
 
-## 2. Créer les tables (copier-coller)
+## 2. Créer les tables
 
-1. Ouvre le fichier `supabase/installation.sql` de ce dossier.
-2. À la ligne marquée ✏️, remplace `prof@exemple.com` par **ton e-mail**.
-3. Dans Supabase : menu de gauche **SQL Editor** → **New query** → colle tout le fichier → **Run**.
-4. Tu dois voir « Success. No rows returned ».
+1. Ouvrir `supabase/installation.sql`.
+2. Dans la commande `insert into public.profs`, remplacer l'adresse par votre e-mail.
+3. Dans Supabase, ouvrir SQL Editor, New query, coller tout le fichier, puis Run.
+4. Le message attendu est « Success. No rows returned ».
 
-Tu peux relancer ce script plus tard sans rien perdre. **Après chaque mise à jour de l'appli, relance-le** : il ajoute les nouvelles fonctions (par exemple le classement) sans effacer les élèves ni leurs résultats.
+Le script peut être relancé sans perte de données. Il faut le relancer après chaque mise à jour de l'application, car il installe les nouvelles fonctions et règles de sécurité.
 
-## 3. Créer ton compte prof
+## 3. Créer le compte prof
 
-1. **Authentication** → **Users** → **Add user** → **Create new user**.
-2. Mets **le même e-mail** qu'à l'étape 2 et un mot de passe.
-3. Coche **Auto Confirm User** → **Create user**.
+1. Authentication, Users, Add user, Create new user.
+2. Utiliser le même e-mail qu'à l'étape 2 et choisir un mot de passe solide.
+3. Cocher Auto Confirm User, puis Create user.
+4. Dans Authentication, Sign In / Providers, désactiver « Allow new users to sign up ». Personne d'autre ne pourra alors créer de compte.
 
-🔒 Conseillé : **Authentication** → **Sign In / Providers** (ou *Settings*) → désactive **Allow new users to sign up**.
-Ainsi, personne d'autre ne peut créer de compte. Même sans ça, seuls les e-mails de la table `profs` voient les résultats.
+Seuls les comptes dont l'e-mail figure dans la table `profs` et a été confirmé peuvent voir les résultats.
 
-## 4. Relier l'appli au serveur
+## 4. Relier l'application au serveur
 
-1. **Project Settings** → **API** (ou **Data API** / **API Keys**).
-2. Copie **Project URL** et la clé **anon public** (ou *publishable*).
-3. Ouvre le fichier **`.env`** (à la racine du dossier) et colle-les, sans guillemets :
+1. Dans Project Settings, API (ou Data API / API Keys), copier Project URL et la clé anon public (ou publishable).
+2. Les coller dans le fichier `.env`, sans guillemets :
 
-```
-SUPABASE_URL=https://abcdxyz.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOi...
-```
+   ```
+   SUPABASE_URL=https://abcdxyz.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOi...
+   ```
 
-⛔ Ne colle jamais la clé **service_role / secret** (le script la refuse).
+   Ne jamais utiliser la clé service_role ou secret. Le script la refuse.
 
-4. Dans un terminal ouvert dans le dossier de l'appli, lance :
+3. Dans un terminal ouvert dans le dossier de l'application :
 
-```
-node outils/generer-config.js
-```
+   ```
+   node outils/generer-config.js
+   ```
 
-   Le script crée `config.js` et augmente tout seul `VERSION` dans `service-worker.js`. Il faut [Node.js](https://nodejs.org), déjà installé sur ton ordinateur.
-5. Remets le dossier en ligne (Netlify : glisse le dossier sur <https://app.netlify.com/drop>, ou sur ton site existant → *Deploys*).
+   Le script écrit `config.js` et augmente `VERSION` dans `service-worker.js`.
 
-**Site relié à GitHub (Netlify ou Vercel)** : `.env` n'est pas envoyé sur GitHub (il est dans `.gitignore`). Saisis plutôt `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans le site :
-- Netlify : *Site configuration → Environment variables* ;
-- Vercel : *Settings → Environment Variables*.
+4. Mettre le dossier en ligne (par exemple sur https://app.netlify.com/drop).
 
-Le script est alors lancé automatiquement à chaque mise en ligne (`netlify.toml` / `vercel.json`).
+Si le site est relié à GitHub, `.env` n'y est pas envoyé. Il faut alors saisir `SUPABASE_URL` et `SUPABASE_ANON_KEY` dans les variables d'environnement de Netlify (Site configuration, Environment variables) ou de Vercel (Settings, Environment Variables). Le script est lancé automatiquement à chaque déploiement.
 
-## 5. Utiliser le tableau de bord
+## 5. Le tableau de bord
 
-Ouvre **`https://ton-site.netlify.app/prof.html`** sur un ordinateur, puis connecte-toi avec l'e-mail et le mot de passe de l'étape 3.
+Ouvrir `https://votre-site/prof.html` sur un ordinateur et se connecter avec le compte de l'étape 3.
 
-| Onglet | Ce que tu y trouves |
+| Onglet | Contenu |
 |---|---|
-| **Vue d'ensemble** | Élèves actifs cette semaine, taux de devoirs rendus, étapes terminées par jour, et les élèves **à surveiller** (devoirs manqués, réponses trop rapides, inactivité). |
-| **Devoirs** | Créer un devoir : titre, étapes, date limite. Les élèves le voient en haut de leur appli, et les étapes sont débloquées pour eux. Clique sur un devoir pour voir, élève par élève : ✓ fait, ⏰ en retard, ✗ non rendu, avec les étoiles et le temps passé. |
-| **Élèves** | Pour chaque élève : dernière activité, activité des 14 derniers jours, étapes, étoiles, temps et devoirs rendus. Clique sur un élève pour voir tout son historique. **Exporter (CSV)** ouvre la liste dans Excel. |
+| Vue d'ensemble | Élèves actifs cette semaine, taux de devoirs rendus, étapes terminées par jour, élèves à surveiller, classement de la semaine. |
+| Devoirs | Création d'un devoir (titre, étapes, date limite). Les élèves le voient sur leur accueil et les étapes sont débloquées pour eux. Un clic sur un devoir donne le détail par élève : fait, rendu en retard ou non rendu, avec les étoiles et le temps passé. |
+| Élèves | Dernière activité, activité sur 14 jours, étapes, étoiles, temps et devoirs rendus. Un clic sur un élève ouvre son historique. Le bouton Exporter (CSV) produit un fichier lisible dans Excel. |
 
-**Comment savoir si un élève a vraiment fait ses devoirs ?**
-- Seules les étapes jouées **après** la création du devoir comptent.
-- ⚡ **Trop rapide** : moins de 6 secondes par mot sur une étape. L'élève a sans doute cliqué au hasard.
-- ⏭ **Exercices passés** : plus de 2 exercices passés sur une étape.
-- Le **temps passé** ne compte pas les moments où l'appli est fermée ou en arrière-plan.
-- Les seuils se règlent en haut de `prof.js` (`REGLES`).
+Pour vérifier qu'un devoir a vraiment été fait :
 
-## 🏆 Le classement
+- seules les étapes jouées après la création du devoir comptent ;
+- une étape faite en moins de 6 secondes par mot est signalée comme trop rapide ;
+- une étape où plus de 2 exercices ont été passés est signalée ;
+- le temps passé ne compte pas les moments où l'application est fermée.
 
-Les élèves ont un écran **Classement** (bouton 🏆 sur l'accueil de l'appli) avec deux onglets :
-- **Cette semaine** : points gagnés depuis lundi. Il repart de zéro chaque lundi, pour que tout le monde ait sa chance.
-- **Général** : total des étoiles depuis le début.
+Ces seuils se règlent dans `prof.js` (constante `REGLES`).
 
-Chaque élève voit le podium, le top 20, sa place et l'écart avec l'élève juste devant lui (« Encore 15 points pour dépasser Li ! »).
+## Le classement
 
-Pour que le classement récompense le vrai travail :
-- une étape rapporte ses points **une seule fois par jour** (le meilleur essai). Rejouer 20 fois la même étape facile ne sert à rien ;
-- les étapes faites **trop vite** (moins de 6 s par mot) ne rapportent aucun point.
+L'onglet Classement de l'application propose deux classements :
 
-Tu retrouves le même classement en bas de la **Vue d'ensemble** du tableau de bord.
-Les élèves ne voient que les **prénoms** et les scores des autres, jamais les erreurs, les devoirs ou les alertes.
+- Cette semaine : points gagnés depuis lundi, remis à zéro chaque lundi ;
+- Général : total des étoiles.
+
+Chaque élève voit le podium, le top 20, sa place et l'écart avec l'élève juste devant lui.
+
+Une étape ne rapporte des points qu'une fois par jour, et les étapes faites trop vite ne rapportent rien. Les élèves ne voient que les prénoms et les scores des autres.
 
 ## Ajouter un autre prof
 
-1. Supabase → **SQL Editor** : `insert into public.profs (email) values ('collegue@ecole.fr');`
-2. **Authentication → Users → Add user** avec ce même e-mail.
+1. Dans SQL Editor : `insert into public.profs (email) values ('collegue@ecole.fr');`
+2. Dans Authentication, Users, créer un compte avec ce même e-mail.
+
+## Sécurité
+
+- La clé anon présente dans `config.js` est publique par nature. Elle ne donne accès à aucune table : les élèves passent uniquement par trois fonctions qui contrôlent toutes les valeurs reçues (format des étapes, scores plafonnés, dates bornées, nombre d'envois limité par heure).
+- Le tableau de bord n'est accessible qu'aux profs listés dans la table `profs`, avec un e-mail confirmé.
+- Les pages sont protégées par une politique de sécurité du contenu (CSP) qui bloque les scripts extérieurs.
+- La connexion des élèves se fait par prénom seulement. C'est simple pour les enfants, mais un élève qui tape le prénom d'un autre jouera sur son compte, et deux élèves qui ont le même prénom partagent leur progression. Demandez-leur d'écrire le prénom suivi de l'initiale du nom, toujours de la même façon (par exemple `Li W.`).
 
 ## À savoir
 
-- **Connexion par prénom** : un élève qui tape le prénom d'un autre jouera sur son compte, et deux élèves qui ont le même prénom partagent leur progression. Demande-leur d'écrire **prénom + initiale du nom**, toujours de la même façon (ex. `Li W.`). Majuscules et accents sont ignorés.
-- **Hors-ligne** : les étapes terminées sans Internet partent automatiquement au prochain lancement avec réseau.
-- **Supprimer un élève** (faute de frappe, doublon) : fiche de l'élève → *Supprimer cet élève*. C'est définitif.
-- **Projet Supabase gratuit en pause** : si personne ne l'utilise pendant 7 jours, Supabase le met en pause. Les élèves continuent de jouer hors-ligne. Va sur supabase.com → ton projet → **Restore**, et tout ce qui attendait est envoyé.
-- **Données personnelles** : seuls les prénoms et les résultats sont enregistrés (pas d'e-mail ni de mot de passe élève). Les prénoms sont visibles par les autres élèves dans le classement. Informe les familles selon les règles de ton établissement.
+- Hors connexion, les étapes terminées sont envoyées au prochain lancement avec Internet.
+- Pour supprimer un élève (faute de frappe, doublon) : fiche de l'élève, Supprimer cet élève. C'est définitif.
+- Un projet Supabase gratuit est mis en pause après 7 jours sans activité. Les élèves continuent de jouer hors connexion. Pour le réactiver : supabase.com, votre projet, Restore.
+- Seuls les prénoms et les résultats sont enregistrés, et les prénoms sont visibles par les autres élèves dans le classement. Informez les familles selon les règles de votre établissement.

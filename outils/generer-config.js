@@ -1,15 +1,6 @@
-/* =====================================================================
-   ⚙️ GÉNÉRER config.js À PARTIR DU FICHIER .env
-   ---------------------------------------------------------------------
-   Utilisation (dans le dossier de l'appli) :   node outils/generer-config.js
-
-   • Lit .env (ou, s'il n'existe pas, les variables d'environnement :
-     pratique sur Netlify / Vercel, où on les saisit dans le site).
-   • Vérifie l'adresse et refuse la clé secrète "service_role".
-   • Écrit config.js, puis augmente VERSION dans service-worker.js si la
-     configuration a changé (sinon les téléphones garderaient l'ancienne).
-   Aucune installation nécessaire : Node.js suffit.
-   ===================================================================== */
+// Crée config.js à partir du fichier .env (ou des variables d'environnement
+// sur Netlify / Vercel). Usage : node outils/generer-config.js
+// Si la configuration change, VERSION est augmentée dans service-worker.js.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -20,11 +11,11 @@ const fichierConfig = path.join(racine, 'config.js');
 const fichierSW = path.join(racine, 'service-worker.js');
 
 function arreter(message) {
-  console.error('\n❌ ' + message + '\n');
+  console.error('\n' + message + '\n');
   process.exit(1);
 }
 
-/* ---------- Lecture du .env (format CLE=valeur, # pour les commentaires) ---------- */
+// Lecture du .env (format CLE=valeur, # pour les commentaires)
 function lireEnv(fichier) {
   const vars = {};
   fs.readFileSync(fichier, 'utf8').split(/\r?\n/).forEach((ligne) => {
@@ -40,7 +31,7 @@ const env = depuisFichier ? lireEnv(fichierEnv) : process.env;
 const url = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
 const cle = String(env.SUPABASE_ANON_KEY || '').trim();
 
-/* ---------- Vérifications ---------- */
+// Vérifications
 if (url && !/^https:\/\/[a-z0-9.-]+$/i.test(url)) {
   arreter(`SUPABASE_URL n'est pas valide : « ${url} »\n   Elle doit ressembler à https://abcdxyz.supabase.co`);
 }
@@ -61,18 +52,8 @@ if (cle) {
   }
 }
 
-/* ---------- Écriture de config.js ---------- */
-const contenu = `/* =====================================================================
-   🔌 CONNEXION AU SERVEUR (Supabase)
-   ⚠️ Fichier GÉNÉRÉ par « node outils/generer-config.js » à partir de .env
-      Ne le modifie pas à la main : change .env puis relance la commande.
-
-   ✅ La clé "anon" peut être publique : les élèves ne peuvent rien lire
-      grâce aux règles de sécurité du fichier supabase/installation.sql.
-   ⛔ Ne mets JAMAIS la clé "service_role" / "secret".
-   Sans valeurs, l'appli marche quand même, mais la progression reste
-   uniquement sur le téléphone.
-   ===================================================================== */
+// Écriture de config.js
+const contenu = `// Fichier généré par outils/generer-config.js à partir de .env. Ne pas modifier à la main.
 const CONFIG_SERVEUR = {
   url: ${JSON.stringify(url)},
   cleAnon: ${JSON.stringify(cle)}
@@ -84,7 +65,7 @@ const valeurs = (t) => (t.match(/url:\s*(['"])(.*?)\1[\s\S]*?cleAnon:\s*(['"])(.
 const change = valeurs(ancien) !== valeurs(contenu);
 fs.writeFileSync(fichierConfig, contenu, 'utf8');
 
-/* ---------- Nouvelle version du Service Worker si la config a changé ---------- */
+// Nouvelle version du Service Worker si la config a changé
 let versionTexte = '';
 if (change && fs.existsSync(fichierSW)) {
   const sw = fs.readFileSync(fichierSW, 'utf8');
@@ -96,7 +77,7 @@ if (change && fs.existsSync(fichierSW)) {
   }
 }
 
-console.log(`\n✅ config.js ${change ? 'mis à jour' : 'inchangé'} (source : ${depuisFichier ? '.env' : "variables d'environnement"})`);
+console.log(`\nconfig.js ${change ? 'mis à jour' : 'inchangé'} (source : ${depuisFichier ? '.env' : "variables d'environnement"})`);
 console.log(url ? `   Serveur : ${url}` : '   Aucun serveur : la progression restera sur chaque téléphone.');
 if (versionTexte) console.log(versionTexte);
 console.log('');

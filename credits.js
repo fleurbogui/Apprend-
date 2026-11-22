@@ -1,9 +1,5 @@
-/* =====================================================================
-   📸 CRÉDITS PHOTOS — généré automatiquement
-   Toutes les photos viennent de Wikimedia Commons (licences libres).
-   Les licences CC BY / CC BY-SA exigent de citer l'auteur : ne supprime
-   pas ce fichier. Si tu ajoutes tes propres photos, ajoute une ligne ici.
-   ===================================================================== */
+// Auteurs et licences des photos, affichés dans l'écran Crédits photos.
+// Les licences CC BY et CC BY-SA imposent de citer l'auteur.
 const CREDITS_PHOTOS = {
  "images/ami.jpg": {
   "auteur": "Surenders25",

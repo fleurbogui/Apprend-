@@ -1,25 +1,10 @@
-/* =====================================================================
-   🧠 LOGIQUE — Le Français en Aventures
-   ---------------------------------------------------------------------
-   Écrans (adresse après le #) :
-     (aucun profil)        → Connexion : « Comment tu t'appelles ? »
-     #/                    → Accueil : devoirs + carte du parcours
-     #/niveau/N            → Choix de l'étape du niveau N
-     #/etape/N/E           → Exercices de l'étape E du niveau N
-     #/resultat/N/E        → Résultat de fin d'étape
-     #/credits             → Crédits photos
-   (N et E commencent à 0)
-
-   Données :
-   • data.js    → NIVEAUX (contenu)
-   • credits.js → CREDITS_PHOTOS
-   • config.js  → CONFIG_SERVEUR (Supabase)
-   • localStorage → profils des élèves de CE téléphone (jamais effacés
-     à la déconnexion) + étapes en attente d'envoi au serveur.
-   ===================================================================== */
+// Le Français en Aventures : application des élèves.
+// Routes : #/ (accueil), #/parcours, #/carnet, #/classement, #/niveau/N,
+// #/etape/N/E, #/resultat/N/E, #/credits. N et E commencent à 0.
+// Les profils sont gardés dans localStorage, même après déconnexion.
 'use strict';
 
-/* ---------- ⚙️ Réglages ---------- */
+// Réglages
 const CONFIG = {
   cleProfils: 'francais-aventures-profils-v2',
   cleAncienne: 'francais-aventures-progression-v1', // version 1 (un seul joueur)
@@ -40,10 +25,9 @@ const TYPES = {
   4: { fr: 'Devinette', zh: '猜谜', aide: false }
 };
 
-/* Valeur des lettres au Scrabble (petit chiffre sur les tuiles) */
+// Valeur des lettres au Scrabble, affichée sur les tuiles
 const VALEURS = { A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:10,L:1,M:2,N:1,O:1,P:3,Q:8,R:1,S:1,T:1,U:1,V:4,W:10,X:10,Y:10,Z:10 };
 
-/* ---------- Icônes dessinées (SVG) ---------- */
 const ICONES = {
   retour: '<path d="M15 18l-6-6 6-6"/>',
   fermer: '<path d="M18 6L6 18M6 6l12 12"/>',
@@ -73,28 +57,25 @@ function ico(nom, classe = '') {
   return `<svg class="ico ${classe}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[nom] || ''}</svg>`;
 }
 
-/* ---------- Petits outils ---------- */
 const $ = (sel) => document.querySelector(sel);
 
 function esc(texte) {
   return String(texte ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
-/** "Français / 中文" → { fr, zh } */
 function bilingue(texte) {
   const i = String(texte).indexOf(' / ');
   return i === -1 ? { fr: String(texte), zh: '' } : { fr: texte.slice(0, i), zh: texte.slice(i + 3) };
 }
-/** Français en gros, chinois en dessous */
 function htmlBi(texte) {
   const b = bilingue(texte);
   return esc(b.fr) + (b.zh ? ` <span class="zh" lang="zh">${esc(b.zh)}</span>` : '');
 }
-/** Comparaison des réponses : sans majuscules, accents, espaces, tirets ("sœur" = "soeur") */
+// Comparaison des réponses : sans majuscules, accents, espaces, tirets ("sœur" = "soeur")
 function normaliser(texte) {
   return String(texte).toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae')
     .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]/g, '');
 }
-/** Clé d'un prénom : "  Zoé  Martin " → "zoe martin" (garde les caractères chinois) */
+// Clé d'un prénom : minuscules, sans accents ni espaces en trop
 function cleNom(nom) {
   return String(nom).toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae')
     .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
@@ -110,7 +91,7 @@ function melanger(tab) {
   }
   return t;
 }
-function vibrer(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* iOS : ignoré */ } }
+function vibrer(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
 function parler(texte) {
   if (!('speechSynthesis' in window)) return;
@@ -122,7 +103,7 @@ function parler(texte) {
     const voix = window.speechSynthesis.getVoices().find((v) => /^fr/i.test(v.lang));
     if (voix) u.voice = voix;
     window.speechSynthesis.speak(u);
-  } catch (e) { /* pas de synthèse vocale */ }
+  } catch (e) {}
 }
 
 let minuteurToast = null;
@@ -134,7 +115,6 @@ function toast(message, duree = 2600) {
   minuteurToast = setTimeout(() => el.classList.remove('visible'), duree);
 }
 
-/** Date locale "AAAA-MM-JJ" */
 function jourLocal(date = new Date()) {
   const d = new Date(date);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -147,12 +127,7 @@ function nouvelId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
-/* =====================================================================
-   👤 PROFILS DES ÉLÈVES (sur ce téléphone)
-   Un profil n'est JAMAIS supprimé à la déconnexion : l'élève retrouve
-   tout en retapant son prénom. Avec le serveur, il le retrouve aussi
-   sur un autre téléphone.
-   ===================================================================== */
+// Profils des élèves (stockés sur le téléphone)
 const Profils = {
   data: { actif: null, profils: {} },
 
@@ -172,7 +147,6 @@ const Profils = {
   actif() { return this.data.profils[this.data.actif] || null; },
   liste() { return Object.values(this.data.profils).sort((a, b) => (b.dernier || 0) - (a.dernier || 0)); },
 
-  /** Ouvre (ou crée) le profil d'un prénom */
   ouvrir(nom) {
     const propre = String(nom).replace(/\s+/g, ' ').trim();
     const cle = cleNom(propre);
@@ -187,7 +161,7 @@ const Profils = {
           p.etapes = ancien.etapes;
           localStorage.removeItem(CONFIG.cleAncienne);
         }
-      } catch (e) { /* rien */ }
+      } catch (e) {}
       this.data.profils[cle] = p;
     }
     p.dernier = Date.now();
@@ -203,7 +177,7 @@ const Profils = {
 };
 const P = () => Profils.actif();
 
-/* ---------- Progression du profil actif ---------- */
+// Progression du profil actif
 const cleEtape = (n, e) => NIVEAUX[n].id + '-' + (e + 1);
 function indexDeCle(cle) {
   const [id, num] = String(cle).split('-').map(Number);
@@ -220,7 +194,7 @@ const totalEtoiles = () => NIVEAUX.reduce((s, _, n) => s + etoilesNiveau(n), 0);
 const totalEtapes = () => NIVEAUX.reduce((s, niv) => s + niv.etapes.length, 0);
 const etapesFaites = () => NIVEAUX.reduce((s, niv, n) => s + niv.etapes.filter((_, e) => etapeTerminee(n, e)).length, 0);
 
-/** Les étapes données en devoir sont toujours ouvertes (sinon impossible de les faire) */
+// Les étapes données en devoir sont toujours ouvertes (sinon impossible de les faire)
 function etapesEnDevoir() {
   const s = new Set();
   ((P() && P().devoirs) || []).forEach((d) => (d.etapes || []).forEach((k) => s.add(k)));
@@ -244,7 +218,7 @@ function etapeSuivante(n, e) {
   return null;
 }
 
-/** Enregistre une étape terminée : meilleur score + historique + file d'envoi au serveur */
+// Enregistre une étape terminée : meilleur score + historique + file d'envoi au serveur
 function enregistrerEtape(n, e, r) {
   const p = P();
   const cle = cleEtape(n, e);
@@ -267,7 +241,6 @@ function enregistrerEtape(n, e, r) {
   return { record: !!prec && r.etoiles > prec.etoiles };
 }
 
-/** Jours d'affilée avec au moins une étape terminée */
 function serieJours() {
   const jours = new Set((P().historique || []).map((h) => jourLocal(h.fait_le)));
   let jour = jourLocal();
@@ -282,8 +255,8 @@ function serieJours() {
   return n;
 }
 
-/* ---------- Devoirs (côté élève) ---------- */
-/** Une étape du devoir est faite si l'élève l'a terminée APRÈS la création du devoir */
+// Devoirs (côté élève)
+// Une étape du devoir est faite si l'élève l'a terminée APRÈS la création du devoir
 function etapeFaitePourDevoir(devoir, cle) {
   const depuis = new Date(devoir.cree_le).getTime() || 0;
   return (P().historique || []).some((h) => h.etape === cle && new Date(h.fait_le).getTime() >= depuis);
@@ -307,11 +280,7 @@ function texteEcheance(d) {
   return { classe: '', texte: `Dans ${d.jours} jours · ${d.jours}天后` };
 }
 
-/* =====================================================================
-   ☁️ SYNCHRONISATION AVEC LE SERVEUR (Supabase)
-   L'appli marche hors-ligne : les étapes terminées attendent dans
-   "enAttente" et partent dès que le réseau revient.
-   ===================================================================== */
+// Synchronisation avec Supabase
 const Sync = {
   enCours: false,
   dernierEssai: 0,
@@ -336,13 +305,20 @@ const Sync = {
     } finally { clearTimeout(minuteur); }
   },
 
-  /** Récupère le classement (top 20 + place de l'élève) et le garde pour le hors-ligne */
+  // Récupère le classement (top 20 + place de l'élève) et le garde pour le hors-ligne
   async classement(q = P()) {
     if (!q || !q.idServeur || !this.configure() || navigator.onLine === false) return false;
     try {
       const c = await this.rpc('classement', { p_id: q.idServeur, p_debut: debutSemaine().toISOString() });
       if (!c || !Array.isArray(c.semaine)) return false;
-      q.classement = { ...c, recu: Date.now() };
+      const propre = (liste) => (Array.isArray(liste) ? liste : []).slice(0, 25).map((x) => ({
+        rang: Number(x.rang) || 0, ordre: Number(x.ordre) || 0, score: Number(x.score) || 0,
+        nom: String(x.nom || '').slice(0, 30), moi: x.moi === true
+      }));
+      q.classement = {
+        debut: c.debut, nb_semaine: Number(c.nb_semaine) || 0, nb_general: Number(c.nb_general) || 0,
+        semaine: propre(c.semaine), general: propre(c.general), recu: Date.now()
+      };
       Profils.sauver();
       return true;
     } catch (e) {
@@ -351,7 +327,7 @@ const Sync = {
     }
   },
 
-  /** Récupère la progression du serveur et envoie les étapes en attente */
+  // Récupère la progression du serveur et envoie les étapes en attente
   async lancer() {
     const p = P();
     if (!p || !this.configure() || this.enCours || navigator.onLine === false) return;
@@ -365,7 +341,7 @@ const Sync = {
       if (!q) return;
       q.idServeur = d.id;
       q.devoirs = Array.isArray(d.devoirs) ? d.devoirs : [];
-      // Fusion : on garde le meilleur score de chaque étape (téléphone ↔ serveur)
+      // On garde le meilleur score entre le téléphone et le serveur
       Object.entries(d.progression || {}).forEach(([k, s]) => {
         const loc = q.etapes[k];
         if (!loc) recuperees++;
@@ -389,7 +365,7 @@ const Sync = {
       q.synchro = Date.now();
       Profils.sauver();
       await this.classement(q);
-      if (recuperees > 0) toast(`☁️ Progression récupérée : ${recuperees} étape(s) · 进度已恢复`);
+      if (recuperees > 0) toast(`Progression récupérée : ${recuperees} étape(s) · 进度已恢复`);
       rafraichirEcran();
     } catch (e) {
       console.warn('Synchronisation impossible (réessai plus tard) :', e.message);
@@ -399,9 +375,7 @@ const Sync = {
   }
 };
 
-/* =====================================================================
-   🧭 NAVIGATION
-   ===================================================================== */
+// Navigation
 let ecranActuel = '';
 
 function aller(hash, remplacer = false) {
@@ -441,7 +415,6 @@ function router() {
   afficherAccueil();
 }
 
-/** Redessine l'écran après une synchro (sans perdre la position de défilement) */
 function rafraichirEcran() {
   const y = window.scrollY;
   if (ecranActuel === 'accueil') afficherAccueil();
@@ -453,9 +426,7 @@ function rafraichirEcran() {
   window.scrollTo(0, y);
 }
 
-/* =====================================================================
-   🧭 BARRE DU HAUT + BARRE DE NAVIGATION (Accueil · Parcours · Carnet · Classement)
-   ===================================================================== */
+// Barre du haut et navigation
 const ONGLETS = [
   { hash: '#/', icone: 'maison', fr: 'Accueil', zh: '首页' },
   { hash: '#/parcours', icone: 'carte', fr: 'Parcours', zh: '学习之路' },
@@ -488,15 +459,12 @@ function htmlNav(actif) {
     </nav>`;
 }
 
-/** Petit titre de section : « ● TON VOYAGE · 你的学习之旅 » */
 const htmlSurtitre = (fr, zh, point = true) =>
   `<p class="surtitre">${point ? '<i></i>' : ''}${esc(fr)}${zh ? ` <span lang="zh">· ${esc(zh)}</span>` : ''}</p>`;
 
-/** Étoile décorative (✳) */
 const DECO = '<svg class="deco" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1"/></svg>';
 
-/* ---------- Données utiles aux écrans ---------- */
-/** Prochaine étape à jouer : [n, e] (ou null si tout est terminé) */
+// Prochaine étape à jouer : [n, e] (ou null si tout est terminé)
 function prochaineEtape() {
   for (let n = 0; n < NIVEAUX.length; n++) {
     for (let e = 0; e < NIVEAUX[n].etapes.length; e++) {
@@ -508,9 +476,7 @@ function prochaineEtape() {
 const couvertureNiveau = (n) => NIVEAUX[n].image || NIVEAUX[n].etapes[0][0].image;
 const etapesFaitesNiveau = (n) => NIVEAUX[n].etapes.filter((_, e) => etapeTerminee(n, e)).length;
 
-/* =====================================================================
-   👋 CONNEXION — « Comment tu t'appelles ? »
-   ===================================================================== */
+// Connexion
 function afficherConnexion() {
   ecranActuel = 'connexion';
   session = null;
@@ -549,9 +515,7 @@ function afficherConnexion() {
     </section>`;
 }
 
-/* =====================================================================
-   🏠 ACCUEIL — rendez-vous du jour, semaine, leçon du jour, voyage
-   ===================================================================== */
+// Accueil
 function htmlSemaine() {
   const jours = new Set((P().historique || []).map((h) => jourLocal(h.fait_le)));
   const lundi = debutSemaine();
@@ -694,9 +658,7 @@ function afficherAccueil() {
     </section>`;
 }
 
-/* =====================================================================
-   🗺️ PARCOURS — tous les niveaux sur le chemin
-   ===================================================================== */
+// Parcours
 function afficherParcours() {
   ecranActuel = 'parcours';
   session = null;
@@ -738,9 +700,7 @@ function afficherParcours() {
     </section>`;
 }
 
-/* =====================================================================
-   📒 CARNET — tous les mots appris, à réécouter
-   ===================================================================== */
+// Carnet
 function afficherCarnet() {
   ecranActuel = 'carnet';
   session = null;
@@ -790,9 +750,7 @@ function afficherCarnet() {
     </section>`;
 }
 
-/* =====================================================================
-   🗺️ NIVEAU — choix de l'étape
-   ===================================================================== */
+// Niveau
 function afficherNiveau(n) {
   ecranActuel = 'niveau:' + n;
   session = null;
@@ -845,12 +803,11 @@ function afficherNiveau(n) {
     </section>`;
 }
 
-
 function validerConnexion(nom) {
   const propre = String(nom || '').replace(/\s+/g, ' ').trim();
   const erreur = $('#erreur-nom');
-  if (!/^[\p{L}\p{M}' .-]{2,30}$/u.test(propre)) {
-    if (erreur) erreur.textContent = 'Écris ton prénom (au moins 2 lettres). · 请输入你的名字（至少两个字）。';
+  if (!/^\p{L}[\p{L}\p{M}' .-]{1,29}$/u.test(propre)) {
+    if (erreur) erreur.textContent = 'Écris ton prénom avec des lettres (au moins 2). · 请用字母输入你的名字（至少两个字）。';
     vibrer(60);
     return;
   }
@@ -860,8 +817,6 @@ function validerConnexion(nom) {
   Sync.lancer();
 }
 
-
-/** Dessine un chemin sinueux (façon carte de jeu) avec des nœuds alternés */
 function htmlCarte(noeuds, { espace = 175, haut = 70, taille = 92 } = {}) {
   const xs = [50, 76, 50, 24];
   const pos = noeuds.map((_, i) => ({ x: xs[i % 4], y: haut + i * espace }));
@@ -889,9 +844,7 @@ function htmlCarte(noeuds, { espace = 175, haut = 70, taille = 92 } = {}) {
     </div>`;
 }
 
-/* =====================================================================
-   ✏️ EXERCICE
-   ===================================================================== */
+// Exercice
 let session = null;
 let dernierResultat = null;
 
@@ -959,7 +912,7 @@ function afficherExercice() {
   const { index, exercices, ex } = session;
   const def = ex.def;
   const t = TYPES[ex.type];
-  const image = String(def.image || '❓');
+  const image = String(def.image || '?');
   const visuel = estImage(image)
     ? `<img class="fond-flou" src="${esc(image)}" alt="" aria-hidden="true"><img class="photo-principale" src="${esc(image)}" alt="">`
     : `<div class="emoji-exo">${esc(image)}</div>`;
@@ -1067,7 +1020,6 @@ function dessinerTuiles() {
   }).join('');
 }
 
-/** Barre du bas : Passer | Indice | Vérifier — puis panneau Bravo / Réponse */
 function dessinerPied() {
   const ex = session.ex;
   const pied = $('#pied');
@@ -1100,7 +1052,7 @@ function message(texteBilingue) {
   if (el) el.innerHTML = texteBilingue ? htmlBi(texteBilingue) : '';
 }
 
-/* ---------- Actions ---------- */
+// Actions
 function choisirTuile(k) {
   const ex = session.ex;
   const tuile = ex.tuiles[k];
@@ -1253,9 +1205,7 @@ function terminerEtape() {
   Sync.lancer();
 }
 
-/* =====================================================================
-   🏆 RÉSULTAT
-   ===================================================================== */
+// Résultat
 function afficherResultat() {
   ecranActuel = 'resultat';
   const r = dernierResultat;
@@ -1295,7 +1245,7 @@ function afficherResultat() {
             ${suite[0] !== r.n ? 'Niveau suivant · 下一关' : 'Étape suivante · 下一步'} ${ico('jouer')}</button>`
           : '<p class="alerte ok">Tu as terminé toute l\'aventure ! · 你完成了全部课程！</p>'}
         <button type="button" class="btn btn-blanc btn-large" data-action="etape" data-n="${r.n}" data-e="${r.e}" data-remplacer="1">${ico('effacer')} Recommencer · 再来一次</button>
-        <button type="button" class="btn btn-blanc btn-large" data-action="accueil">${ico('retour')} Mon aventure · 返回</button>
+        <button type="button" class="btn btn-blanc btn-large" data-action="accueil">${ico('maison')} Accueil · 首页</button>
       </div>
       <div style="height:calc(28px + var(--sur-bas))"></div>
     </section>`;
@@ -1320,12 +1270,7 @@ function lancerConfettis() {
   setTimeout(() => zone.remove(), 4500);
 }
 
-/* =====================================================================
-   🏆 CLASSEMENT — pour motiver les élèves entre eux
-   Semaine : points gagnés depuis lundi (une étape compte 1 fois par jour,
-   les étapes faites trop vite ne comptent pas). Général : total des étoiles.
-   Les calculs sont faits par le serveur (fonction « classement »).
-   ===================================================================== */
+// Classement
 let ongletClassement = 'semaine';
 
 function debutSemaine(d = new Date()) {
@@ -1336,7 +1281,7 @@ function debutSemaine(d = new Date()) {
 }
 const rangFr = (r) => (r === 1 ? '1er' : r + 'e');
 
-/** Classement en cache (la partie « semaine » est vidée si une nouvelle semaine a commencé) */
+// Classement en cache (la partie « semaine » est vidée si une nouvelle semaine a commencé)
 function classementCache() {
   const c = P() && P().classement;
   if (!c) return null;
@@ -1359,7 +1304,6 @@ function afficherClassement(rafraichir = true) {
   const unite = semaine ? 'pts' : '★';
   const moi = liste.find((x) => x.moi);
 
-  // Phrase de motivation : qui dépasser, et de combien
   let motivation = '';
   if (c && !moi) {
     motivation = semaine ? 'Termine une étape pour entrer dans le classement de la semaine ! · 完成一个关卡即可上榜！'
@@ -1449,9 +1393,7 @@ function afficherClassement(rafraichir = true) {
   }
 }
 
-/* =====================================================================
-   📸 CRÉDITS PHOTOS
-   ===================================================================== */
+// Crédits photos
 function afficherCredits() {
   ecranActuel = 'credits';
   session = null;
@@ -1478,9 +1420,7 @@ function afficherCredits() {
     </section>`;
 }
 
-/* =====================================================================
-   👤 MENU DU PROFIL + 📲 AIDE À L'INSTALLATION
-   ===================================================================== */
+// Menu du profil + aide à l'installation
 const Appareil = {
   ios: /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
   android: /android/i.test(navigator.userAgent),
@@ -1574,9 +1514,7 @@ function ouvrirAide() {
     </div>`);
 }
 
-/* =====================================================================
-   👆 CLICS (un seul écouteur pour toute l'appli)
-   ===================================================================== */
+// Gestion des clics
 document.addEventListener('click', (ev) => {
   if (ev.target.id === 'modale') { fermerModale(); return; }
   const el = ev.target.closest('[data-action]');
@@ -1655,12 +1593,8 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && Date.now() - Sync.dernierEssai > 60000) Sync.lancer();
 });
 
-/* =====================================================================
-   ⚙️ SERVICE WORKER (hors-ligne + mises à jour)
-   ===================================================================== */
-// Mise à jour AUTOMATIQUE : la nouvelle version est téléchargée en arrière-plan,
-// puis installée dès que l'élève est à un moment « calme » (jamais pendant un
-// exercice, sur l'écran de résultat, ou pendant qu'il écrit son prénom).
+// Service worker
+// Une nouvelle version s'installe seule, mais jamais pendant un exercice ou une saisie.
 let travailleurEnAttente = null;
 let majDemandee = false;
 function momentCalme() {
@@ -1671,7 +1605,7 @@ function proposerMiseAJour(t) { travailleurEnAttente = t; essayerMiseAJour(); }
 function essayerMiseAJour() {
   if (!travailleurEnAttente || majDemandee || !momentCalme()) return;
   majDemandee = true;
-  try { sessionStorage.setItem('maj-faite', '1'); } catch (e) { /* rien */ }
+  try { sessionStorage.setItem('maj-faite', '1'); } catch (e) {}
   travailleurEnAttente.postMessage({ type: 'SKIP_WAITING' });
 }
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
@@ -1687,7 +1621,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
       });
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') reg.update().catch(() => {});
-        essayerMiseAJour(); // l'appli passe en arrière-plan ou revient : bon moment pour se mettre à jour
+        essayerMiseAJour();
       });
     }).catch((err) => console.warn('Service Worker non enregistré :', err));
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -1696,15 +1630,13 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
   });
 }
 
-/* =====================================================================
-   🚀 DÉMARRAGE
-   ===================================================================== */
+// Démarrage
 Profils.charger();
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
 window.addEventListener('popstate', () => { router(); essayerMiseAJour(); });
 try {
-  if (sessionStorage.getItem('maj-faite')) { sessionStorage.removeItem('maj-faite'); setTimeout(() => toast('✨ Appli mise à jour · 已更新'), 600); }
-} catch (e) { /* rien */ }
+  if (sessionStorage.getItem('maj-faite')) { sessionStorage.removeItem('maj-faite'); setTimeout(() => toast('Appli mise à jour · 已更新'), 600); }
+} catch (e) {}
 router();
 Sync.lancer();

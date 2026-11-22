@@ -1,13 +1,6 @@
-/* =====================================================================
-   🎨 STYLES — Le Français en Aventures (thème rouge & blanc)
-   Style calme et soigné : fond crème, cartes douces, barre de
-   navigation en bas, lettres façon Scrabble, parcours sinueux.
-   Pour changer les couleurs : modifie les variables ci-dessous
-   (et theme_color dans manifest.json + index.html).
-   ===================================================================== */
+/* Styles de l'application élève. Les couleurs sont définies dans :root. */
 
 :root {
-  /* Rouge & blanc */
   --rouge: #D3262D;
   --rouge-vif: #E8434A;
   --rouge-fonce: #A8171D;
@@ -45,7 +38,7 @@
   --sur-droite: env(safe-area-inset-right, 0px);
 }
 
-/* ---------- Base ---------- */
+/* Base */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--creme); }
 body {
@@ -86,7 +79,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .contenu { padding: 18px 16px calc(28px + var(--sur-bas)); flex: 1; display: flex; flex-direction: column; }
 @keyframes entree { from { opacity: 0; transform: translateY(8px); } }
 
-/* ---------- Boutons ---------- */
+/* Boutons */
 .btn {
   min-height: 52px;
   min-width: 44px;
@@ -132,7 +125,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .etoile-or { color: var(--or); }
 .flamme { color: #FF6A00; }
 
-/* ---------- Écran de connexion ---------- */
+/* Écran de connexion */
 .ecran-connexion { min-height: 100vh; min-height: 100dvh; }
 
 .champ {
@@ -249,7 +242,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .etiquette .etoiles-mini .ico { width: 13px; height: 13px; }
 .noeud.verrouille .etiquette { opacity: .7; }
 
-/* ---------- Écran niveau ---------- */
+/* Écran niveau */
 
 .noeud-etape .noeud-bouton {
   width: 80px; height: 80px;
@@ -273,10 +266,10 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 }
 .legende-types div { display: flex; gap: 8px; align-items: center; line-height: 1.2; }
 .legende-types .zh { display: block; color: var(--encre-douce); }
-.puce-type { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: .8rem; color: var(--blanc); flex-shrink: 0; font-family: var(--police-titre); }
+.puce-type { width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .8rem; color: var(--blanc); flex-shrink: 0; font-family: var(--police-titre); }
 .t1 { background: #FF7A7E; } .t2 { background: var(--rouge); } .t3 { background: var(--rouge-fonce); } .t4 { background: var(--rouge-nuit); }
 
-/* ---------- Écran exercice ---------- */
+/* Écran exercice */
 .exo-haut {
   display: flex; align-items: center; gap: 12px;
   padding: calc(12px + var(--sur-haut)) 16px 6px;
@@ -286,11 +279,11 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .segments span.fait { background: var(--rouge); }
 .segments span.fait::after { content: ""; position: absolute; left: 6px; right: 6px; top: 3px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.4); }
 .segments span.actuel { background: var(--rose); box-shadow: inset 0 0 0 2px var(--rouge); }
-.points-exo { font-family: var(--police-titre); font-weight: 900; color: var(--or-fonce); display: inline-flex; align-items: center; gap: 4px; min-width: 52px; justify-content: flex-end; }
+.points-exo { font-family: var(--police-titre); font-weight: 700; color: var(--or-fonce); display: inline-flex; align-items: center; gap: 4px; min-width: 52px; justify-content: flex-end; }
 .points-exo .ico { color: var(--or); }
 
 .zone-exo { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 16px 16px; text-align: center; }
-.type-exo { font-family: var(--police-titre); font-weight: 900; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--rouge); display: inline-flex; align-items: center; gap: 6px; }
+.type-exo { font-family: var(--police-titre); font-weight: 700; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--rouge); display: inline-flex; align-items: center; gap: 6px; }
 
 /* Photo façon polaroid */
 .polaroid {
@@ -314,7 +307,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 }
 .polaroid .btn-son { position: absolute; right: -10px; bottom: -14px; transform: rotate(1.5deg); }
 
-.consigne { font-family: var(--police-titre); font-weight: 800; font-size: 1.12rem; line-height: 1.3; margin-top: 4px; }
+.consigne { font-family: var(--police-titre); font-weight: 700; font-size: 1.12rem; line-height: 1.3; margin-top: 4px; }
 .consigne .zh { display: block; font-family: var(--police); font-size: .95rem; color: var(--encre-douce); font-weight: 600; }
 
 .bulle-indice {
@@ -331,7 +324,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .case {
   flex: 0 1 46px; min-width: 24px; height: 56px;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--police-titre); font-size: 1.6rem; font-weight: 900; text-transform: uppercase;
+  font-family: var(--police-titre); font-size: 1.6rem; font-weight: 700; text-transform: uppercase;
   color: var(--encre);
   border-bottom: 4px solid var(--ligne-forte);
   transition: border-color .15s ease, color .15s ease, transform .15s ease;
@@ -353,7 +346,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 @keyframes secousse { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
 @keyframes saut { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-.message-essai { min-height: 24px; font-weight: 800; color: var(--rouge-fonce); font-size: .95rem; }
+.message-essai { min-height: 24px; font-weight: 700; color: var(--rouge-fonce); font-size: .95rem; }
 .message-essai .zh { color: var(--encre-douce); font-weight: 600; }
 
 /* Lettres façon Scrabble */
@@ -367,13 +360,13 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
   font-family: var(--police-titre); font-size: 1.5rem; font-weight: 750;
   transition: transform .08s ease, box-shadow .08s ease, opacity .15s ease;
 }
-.tuile::after { content: attr(data-pts); position: absolute; right: 5px; bottom: 2px; font-size: .55rem; color: var(--encre-douce); font-weight: 800; }
+.tuile::after { content: attr(data-pts); position: absolute; right: 5px; bottom: 2px; font-size: .55rem; color: var(--encre-douce); font-weight: 700; }
 .tuile:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ligne-forte); }
 .tuile.utilisee { opacity: .15; transform: translateY(5px); box-shadow: none; pointer-events: none; }
 
 .saisie {
   width: 100%; max-width: 380px; min-height: 58px; padding: 12px 16px;
-  font: inherit; font-family: var(--police-titre); font-size: 1.35rem; font-weight: 900;
+  font: inherit; font-family: var(--police-titre); font-size: 1.35rem; font-weight: 700;
   text-align: center; letter-spacing: .12em; color: var(--rouge-fonce);
   background: var(--blanc); border: 1.5px solid var(--ligne-forte); border-radius: 14px;
   -webkit-appearance: none; appearance: none;
@@ -381,7 +374,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .saisie:focus { outline: none; border-color: var(--rouge); }
 .saisie::placeholder { letter-spacing: 0; color: #C9A9A8; font-size: 1rem; }
 
-/* Barre du bas + panneau de résultat (façon jeu) */
+/* Barre du bas de l'exercice */
 .pied-exo {
   position: sticky; bottom: 0; z-index: 5;
   padding: 14px 16px calc(14px + var(--sur-bas));
@@ -393,7 +386,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .pied-exo .btn-rouge, .pied-exo .btn-vert { flex: 1; }
 .pied-exo .petit-bouton {
   width: 56px; min-width: 56px; padding: 0; flex-direction: column; gap: 0;
-  font-size: .62rem; font-family: var(--police); font-weight: 800; color: var(--rouge-fonce);
+  font-size: .62rem; font-family: var(--police); font-weight: 700; color: var(--rouge-fonce);
 }
 .pied-exo .petit-bouton .ico { width: 22px; height: 22px; }
 .pied-exo.reussi { background: var(--vert-pale); border-top-color: #BFE8CE; flex-wrap: wrap; animation: monte .25s ease; }
@@ -402,13 +395,13 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .verdict .rond-verdict { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blanc); flex-shrink: 0; }
 .reussi .rond-verdict { background: var(--vert); }
 .rate .rond-verdict { background: var(--rouge); }
-.verdict b { font-family: var(--police-titre); font-size: 1.25rem; font-weight: 900; display: block; line-height: 1.15; }
+.verdict b { font-family: var(--police-titre); font-size: 1.25rem; font-weight: 700; display: block; line-height: 1.15; }
 .reussi .verdict b { color: var(--vert-fonce); }
 .rate .verdict b { color: var(--rouge-fonce); }
 .verdict span { font-size: .9rem; color: var(--encre-douce); font-weight: 600; }
 @keyframes monte { from { transform: translateY(40%); opacity: 0; } }
 
-/* ---------- Écran résultat ---------- */
+/* Écran résultat */
 .resultat-haut {
   margin: calc(12px + var(--sur-haut)) 16px 16px; padding: 28px 16px 24px; text-align: center;
   background: var(--rose-pale); border: 1px solid var(--rose); border-radius: 26px;
@@ -435,13 +428,13 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .stat b { display: block; font-family: var(--police-titre); font-weight: 700; font-size: 1.4rem; color: var(--rouge); }
 .stat span { font-size: .72rem; color: var(--encre-douce); font-weight: 700; line-height: 1.2; display: block; }
 .mots-appris { margin: 16px 16px 0; }
-.mots-appris h2 { font-family: var(--police-titre); font-size: 1rem; font-weight: 900; margin-bottom: 10px; }
+.mots-appris h2 { font-family: var(--police-titre); font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
 .mots-appris h2 .zh { color: var(--encre-douce); font-family: var(--police); font-size: .85rem; }
 .mots-appris ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
 .puce-mot {
   min-height: 46px; display: inline-flex; align-items: center; gap: 8px;
   padding: 4px 14px 4px 4px; border-radius: 999px;
-  background: var(--blanc); border: 2px solid var(--ligne); font-weight: 800; color: var(--encre);
+  background: var(--blanc); border: 2px solid var(--ligne); font-weight: 700; color: var(--encre);
 }
 .puce-mot img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 .puce-mot .ico { color: var(--rouge); width: 18px; height: 18px; }
@@ -453,7 +446,7 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .confettis i { position: absolute; top: -14px; width: 10px; height: 14px; border-radius: 2px; animation: chute linear forwards; }
 @keyframes chute { to { transform: translateY(110vh) rotate(720deg); } }
 
-/* ---------- Feuille du bas (menu profil, aide) ---------- */
+/* Feuille du bas */
 .modale-fond {
   position: fixed; inset: 0; z-index: 40;
   background: rgba(43, 22, 23, .5);
@@ -470,10 +463,10 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .modale::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 5px; background: var(--ligne); margin: 0 auto 14px; }
 @media (min-width: 620px) { .modale-fond { align-items: center; } .modale { border-radius: 28px; } }
 @keyframes fondu { from { opacity: 0; } }
-.modale h2 { font-family: var(--police-titre); font-weight: 900; font-size: 1.35rem; line-height: 1.2; }
+.modale h2 { font-family: var(--police-titre); font-weight: 700; font-size: 1.35rem; line-height: 1.2; }
 .modale h2 .zh { display: block; font-size: .95rem; color: var(--encre-douce); font-family: var(--police); }
 .entete-profil { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.entete-profil b { font-family: var(--police-titre); font-size: 1.4rem; font-weight: 900; display: block; }
+.entete-profil b { font-family: var(--police-titre); font-size: 1.4rem; font-weight: 700; display: block; }
 .entete-profil small { color: var(--encre-douce); font-size: .85rem; }
 .menu-liste { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .menu-liste .btn { justify-content: flex-start; }
@@ -484,19 +477,19 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 
 .bloc-os { border: 2px solid var(--ligne); border-radius: var(--rayon); padding: 14px 16px; margin-top: 12px; }
 .bloc-os.actif { border-color: var(--rouge); background: var(--rose-pale); }
-.bloc-os h3 { font-family: var(--police-titre); font-weight: 900; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bloc-os h3 { font-family: var(--police-titre); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .bloc-os .tag { font-size: .7rem; background: var(--rouge); color: var(--blanc); padding: 2px 8px; border-radius: 999px; font-family: var(--police); }
 .bloc-os ol { margin: 10px 0 0 20px; display: flex; flex-direction: column; gap: 6px; }
 .bloc-os .zh { font-size: .88rem; color: var(--encre-douce); margin-top: 8px; display: block; }
 .alerte { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #FFF4D6; color: #7A5200; font-size: .9rem; }
 .alerte.ok { background: var(--vert-pale); color: var(--vert-fonce); }
 .modale details { margin-top: 12px; border-top: 2px dashed var(--ligne); padding-top: 10px; }
-.modale summary { cursor: pointer; font-weight: 800; min-height: 44px; display: flex; align-items: center; }
+.modale summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 .modale details p, .modale details ul { font-size: .9rem; color: var(--encre-douce); margin-top: 6px; }
 .modale details ul { margin-left: 18px; }
 .actions-modale { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
 
-/* ---------- Crédits ---------- */
+/* Crédits */
 .liste-credits { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .liste-credits li { display: flex; gap: 12px; align-items: center; padding: 8px; background: var(--blanc); border-radius: 14px; border: 2px solid var(--ligne); font-size: .8rem; min-width: 0; }
 .liste-credits img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--rose); }
@@ -504,23 +497,24 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .liste-credits b { font-family: var(--police-titre); font-size: .95rem; }
 .liste-credits span { color: var(--encre-douce); overflow-wrap: anywhere; }
 
-/* ---------- Classement ---------- */
+/* Classement */
 .trophee { color: var(--or-fonce); }
 
 .onglets-classement {
+  margin-top: 16px;
   display: flex; padding: 4px; gap: 4px; border-radius: 16px;
   background: var(--blanc); border: 1px solid var(--ligne);
 }
 .onglets-classement button {
   flex: 1; min-height: 44px; border-radius: 12px;
-  font-family: var(--police-titre); font-weight: 800; font-size: .92rem; color: var(--encre-douce);
+  font-family: var(--police-titre); font-weight: 700; font-size: .92rem; color: var(--encre-douce);
 }
 .onglets-classement button[aria-selected="true"] { background: var(--rouge); color: var(--blanc); }
 
 .motivation {
   display: flex; gap: 10px; align-items: center; margin-top: 14px; padding: 12px 14px;
   border-radius: 16px; background: #FFF4D1; border: 2px solid #F5D77A;
-  font-weight: 800; font-size: .92rem; line-height: 1.3; color: #6B4A00;
+  font-weight: 700; font-size: .92rem; line-height: 1.3; color: #6B4A00;
 }
 .motivation .ma-place { display: block; font-family: var(--police-titre); font-size: 1.05rem; color: var(--rouge-fonce); margin-bottom: 2px; }
 .motivation .ico { width: 26px; height: 26px; flex-shrink: 0; color: var(--or-fonce); }
@@ -531,11 +525,11 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
 .marche.un .avatar { width: 64px; height: 64px; font-size: 1.7rem; box-shadow: 0 0 0 4px var(--or), 0 4px 0 4px var(--or-fonce); }
 .marche.deux .avatar { box-shadow: 0 0 0 3px #C9CED6; }
 .marche.trois .avatar { box-shadow: 0 0 0 3px #D9935B; }
-.marche .nom { font-family: var(--police-titre); font-weight: 900; font-size: .9rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.marche .score { font-size: .8rem; font-weight: 800; color: var(--encre-douce); margin-bottom: 6px; }
+.marche .nom { font-family: var(--police-titre); font-weight: 700; font-size: .9rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marche .score { font-size: .8rem; font-weight: 700; color: var(--encre-douce); margin-bottom: 6px; }
 .marche .socle {
   width: 100%; border-radius: 14px 14px 4px 4px; display: flex; align-items: flex-start; justify-content: center; padding-top: 8px;
-  font-family: var(--police-titre); font-weight: 900; font-size: 1.6rem; color: var(--blanc);
+  font-family: var(--police-titre); font-weight: 700; font-size: 1.6rem; color: var(--blanc);
 }
 .marche.un .socle { height: 96px; background: var(--rouge); box-shadow: inset 0 -6px 0 var(--rouge-fonce); }
 .marche.deux .socle { height: 70px; background: #F06A6E; box-shadow: inset 0 -6px 0 var(--rouge); }
@@ -549,19 +543,17 @@ svg.ico { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.2em;
   background: var(--blanc); border: 1px solid var(--ligne); border-radius: 16px;
 }
 .liste-classement li.moi { border-color: var(--rouge); background: var(--rose-pale); }
-.liste-classement li.saut { background: none; border: 0; min-height: 0; padding: 0; justify-content: center; color: var(--encre-douce); font-weight: 900; letter-spacing: .2em; }
-.liste-classement .rang { width: 28px; text-align: center; font-family: var(--police-titre); font-weight: 900; color: var(--encre-douce); }
+.liste-classement li.saut { background: none; border: 0; min-height: 0; padding: 0; justify-content: center; color: var(--encre-douce); font-weight: 700; letter-spacing: .2em; }
+.liste-classement .rang { width: 28px; text-align: center; font-family: var(--police-titre); font-weight: 700; color: var(--encre-douce); }
 .liste-classement .avatar { width: 38px; height: 38px; font-size: 1rem; }
-.liste-classement .nom { flex: 1; min-width: 0; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.liste-classement .nom { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .liste-classement .nom small { font-weight: 600; color: var(--encre-douce); }
-.liste-classement .score { font-family: var(--police-titre); font-weight: 900; color: var(--rouge-fonce); white-space: nowrap; }
+.liste-classement .score { font-family: var(--police-titre); font-weight: 700; color: var(--rouge-fonce); white-space: nowrap; }
 
 .classement-vide { margin: 26px 8px; text-align: center; font-weight: 700; color: var(--encre-douce); line-height: 1.5; }
 .regle-classement { margin-top: 18px; font-size: .78rem; color: var(--encre-douce); text-align: center; line-height: 1.5; }
 
-/* =====================================================================
-   🧭 BARRE DU HAUT + BARRE DE NAVIGATION
-   ===================================================================== */
+/* Barre du haut + barre de navigation */
 .cache { position: absolute; left: -9999px; }
 .barre-haut {
   position: sticky; top: 0; z-index: 20;
@@ -605,9 +597,7 @@ button.avatar { cursor: pointer; }
 .nav-bas button:active { background: var(--rose-pale); }
 .avec-nav { padding-bottom: calc(84px + var(--sur-bas)); }
 
-/* =====================================================================
-   📄 PAGES (accueil, parcours, carnet, classement…)
-   ===================================================================== */
+/* Pages */
 .page { padding: 22px 16px 4px; display: flex; flex-direction: column; }
 .carte { background: var(--blanc); border: 1px solid var(--ligne); border-radius: 22px; box-shadow: var(--ombre-douce); }
 .surtitre {
@@ -623,7 +613,7 @@ button.avatar { cursor: pointer; }
 .salut { font-size: 2.1rem; }
 .titre-page { font-size: 1.85rem; }
 .sous-salut { margin-top: 6px; color: var(--encre-douce); font-size: .95rem; }
-.sous-salut span { white-space: nowrap; }
+
 
 /* Semaine */
 .semaine { margin-top: 22px; padding: 14px 16px 16px; }
@@ -667,7 +657,7 @@ button.avatar { cursor: pointer; }
 .lecon-photos .deco { position: absolute; right: -6px; top: 70px; width: 20px; height: 20px; }
 .lecon-tampon {
   position: absolute; right: 12px; bottom: 12px; z-index: 2; text-align: right;
-  font-size: .6rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--rouge-fonce); opacity: .7;
+  font-size: .6rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--rouge-fonce); opacity: .7;
   transform: rotate(-8deg);
 }
 .lecon.fini { display: block; min-height: 0; }
@@ -698,7 +688,7 @@ button.avatar { cursor: pointer; }
 .cn-haut { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; min-height: 44px; }
 .cn-haut img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--blanc); box-shadow: 0 4px 10px -6px rgba(38, 26, 27, .5); }
 .cn-haut .emoji { font-size: 1.8rem; }
-.puce { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.puce { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .puce .ico { width: 11px; height: 11px; stroke-width: 3; }
 .puce.ok { background: var(--blanc); color: var(--rouge-fonce); border: 1px solid var(--rose); }
 .puce.encours { background: var(--rose); color: var(--rouge-fonce); }
@@ -766,7 +756,7 @@ button.avatar { cursor: pointer; }
   .lecon-photos { min-height: 120px; }
 }
 
-/* ---------- Toast ---------- */
+/* Toast */
 .toast {
   position: fixed; left: 50%; bottom: calc(100px + var(--sur-bas));
   transform: translate(-50%, 20px); max-width: calc(100% - 32px);

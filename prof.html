@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Espace prof — Le Français en Aventures</title>
   <meta name="robots" content="noindex, nofollow">
@@ -10,8 +12,6 @@
   <link rel="stylesheet" href="prof.css">
 </head>
 <body>
-  <!-- Tableau de bord des profs : suivi des élèves et des devoirs.
-       Les données viennent de Supabase (voir config.js et supabase/installation.sql). -->
   <div id="racine"></div>
   <div id="infobulle" class="infobulle" role="tooltip" hidden></div>
   <div id="fenetre" class="fenetre-fond" hidden></div>

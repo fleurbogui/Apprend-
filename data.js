@@ -1,36 +1,21 @@
-/* =====================================================================
-   📝 DONNÉES DES EXERCICES — Le Français en Aventures
-   ---------------------------------------------------------------------
-   C'est le SEUL fichier à modifier pour ajouter du contenu.
+// Contenu de l'application : niveaux, étapes et exercices.
+//
+// Un niveau : { id, nom: "Français / 中文", image (facultatif), etapes: [...] }.
+// L'id ne doit jamais changer, il sert à enregistrer la progression.
+// L'ordre du tableau est l'ordre d'affichage.
+//
+// Un exercice :
+//   type      1 facile (lettres à cliquer), 2 première lettre donnée + lettres pièges,
+//             3 saisie au clavier, 4 devinette avec indice
+//   image     chemin de la photo, par exemple "images/chat.jpg"
+//   mot       la réponse avec ses accents ; majuscules, accents et tirets sont ignorés à la correction
+//   indice    pour le type 4, "Français / 中文"
+//   consigne  "Français / 中文"
+//   lettres   facultatif, lettres proposées pour le type 1
+//   audio     facultatif, texte prononcé s'il diffère du mot
+//
+// Après une modification, augmenter VERSION dans service-worker.js.
 
-   Structure : NIVEAUX → ÉTAPES → EXERCICES
-   - Chaque niveau  = un thème (nom bilingue "Français / 中文")
-   - Chaque étape   = une liste d'exercices (5 conseillés)
-   - Chaque exercice :
-       type     : 1 = 🔵 Facile (lettres à cliquer)
-                  2 = 🟡 Intermédiaire (1re lettre donnée + lettres à cliquer, avec 2 lettres pièges)
-                  3 = 🟠 Défi (saisie clavier, sans aide)
-                  4 = 🟣 Devinette (indice bilingue + saisie clavier)
-       image    : chemin d'une photo ("images/chat.jpg") — un emoji ("🐱") marche aussi
-       mot      : la réponse, bien orthographiée avec ses accents ("éléphant", "au revoir").
-                  À la vérification, majuscules, accents, espaces et tirets sont ignorés :
-                  "elephant", "Éléphant" et "ÉLÉPHANT" sont tous acceptés.
-       indice   : (type 4) indice bilingue "Français / 中文"
-       consigne : consigne bilingue "Français / 中文"
-       lettres  : (facultatif, type 1) lettres proposées — sinon tirées du mot
-       audio    : (facultatif) texte prononcé par 🔊 si différent du mot
-     Champs facultatifs d'un niveau :
-       image    : photo de couverture (sinon : la photo du 1er exercice)
-
-   ➕ AJOUTER UN NIVEAU : copie un bloc { id, nom, etapes } et donne-lui
-      un id UNIQUE et DÉFINITIF (il sert à sauvegarder la progression).
-   ➕ AJOUTER UNE PHOTO : mets-la dans le dossier images/ (format JPG,
-      environ 500 px de large), puis ajoute son auteur dans credits.js.
-   ⚠️ Après modification : augmente VERSION dans service-worker.js
-      pour que les téléphones déjà installés reçoivent la mise à jour.
-   ===================================================================== */
-
-// Consignes réutilisées
 const CLIQUE   = "Clique les lettres pour former le mot / 点击字母拼出单词";
 const COMPLETE = "Complète le mot / 补全单词";
 const ECRIS    = "Écris le mot sans aide / 独立拼写单词";
@@ -39,7 +24,6 @@ const COULEUR  = "Quelle est cette couleur ? / 这是什么颜色？";
 const COMBIEN  = "Combien y en a-t-il ? / 有几个？";
 
 const NIVEAUX = [
-  /* ------------------------------------------------------------- */
   {
     id: 1,
     nom: "Salutations & Présentation / 问候与介绍",
@@ -67,7 +51,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 3,
     nom: "La famille / 家庭",
@@ -88,7 +71,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 9,
     nom: "Les fruits et légumes / 水果和蔬菜",
@@ -117,7 +99,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 4,
     nom: "Nourriture & Boissons / 食物与饮料",
@@ -138,7 +119,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 2,
     nom: "Couleurs & Nombres / 颜色与数字",
@@ -159,7 +139,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 5,
     nom: "Les animaux / 动物",
@@ -187,7 +166,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 6,
     nom: "La maison / 家",
@@ -208,7 +186,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 7,
     nom: "Le corps / 身体",
@@ -229,7 +206,6 @@ const NIVEAUX = [
       ]
     ]
   },
-  /* ------------------------------------------------------------- */
   {
     id: 8,
     nom: "Les vêtements / 衣服",

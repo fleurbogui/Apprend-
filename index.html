@@ -2,18 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <!-- viewport-fit=cover : utilise tout l'écran (encoche iPhone gérée en CSS via safe-area) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Le Français en Aventures</title>
   <meta name="description" content="Apprends le français en t'amusant ! / 轻松学法语！">
 
-  <!-- ===== PWA commune (Android / Chrome / Edge) ===== -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#E4252B">
+  <meta name="theme-color" content="#FAF6F2">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
-  <!-- ===== Spécifique iOS (iPhone / iPad — Safari) ===== -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Français Aventures">
@@ -23,18 +22,14 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Chaque écran est dessiné ici par app.js -->
   <div id="app" class="app"></div>
 
-  <!-- Feuille du bas (menu profil, aide) -->
   <div id="modale" class="modale-fond" hidden></div>
 
-  <!-- Petits messages temporaires -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <noscript><p style="padding:24px;text-align:center">Active JavaScript pour utiliser l'appli. / 请启用 JavaScript。</p></noscript>
 
-  <!-- Réglages et données d'abord, logique ensuite -->
   <script src="config.js"></script>
   <script src="data.js"></script>
   <script src="credits.js"></script>

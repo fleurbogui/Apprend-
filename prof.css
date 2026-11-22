@@ -1,6 +1,4 @@
-/* =====================================================================
-   🎨 Tableau de bord prof — même univers rouge & blanc que l'appli
-   ===================================================================== */
+/* Styles du tableau de bord prof. */
 :root {
   --rouge: #E4252B;
   --rouge-fonce: #B5141B;
@@ -64,7 +62,7 @@ svg.ico { width: 1.15em; height: 1.15em; vertical-align: -0.18em; flex-shrink: 0
 .btn-transparent { background: rgba(255,255,255,.16); color: var(--blanc); border: 2px solid rgba(255,255,255,.4); box-shadow: none; }
 .btn-petit { min-height: 36px; padding: 6px 12px; font-size: .88rem; }
 
-/* ---------- Connexion ---------- */
+/* Connexion */
 .page-connexion { min-height: 100vh; display: flex; flex-direction: column; }
 .page-connexion .haut { padding: 48px 20px 40px; text-align: center; }
 .page-connexion .haut h1 { font-size: 2rem; text-shadow: 0 3px 0 var(--rouge-fonce); }
@@ -84,7 +82,7 @@ svg.ico { width: 1.15em; height: 1.15em; vertical-align: -0.18em; flex-shrink: 0
 .note { font-size: .85rem; color: var(--encre-douce); }
 .erreur { color: var(--critique); font-weight: 700; font-size: .9rem; min-height: 1.3em; }
 
-/* ---------- Structure ---------- */
+/* Structure */
 .entete { padding: 16px 24px 18px; }
 .entete .ligne { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .entete .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--blanc); box-shadow: 0 3px 0 var(--rouge-fonce); }

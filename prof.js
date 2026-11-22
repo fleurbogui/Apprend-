@@ -1,14 +1,8 @@
-/* =====================================================================
-   👩‍🏫 TABLEAU DE BORD PROF — Le Français en Aventures
-   ---------------------------------------------------------------------
-   • Connexion du prof : e-mail + mot de passe (compte Supabase Auth)
-   • Vue d'ensemble : activité de la classe, élèves à surveiller
-   • Devoirs : créer un devoir (étapes + date limite), voir qui l'a fait
-   • Élèves : progression, activité des 14 derniers jours, historique
-   ===================================================================== */
+// Tableau de bord des profs : connexion Supabase, suivi des élèves,
+// devoirs et classement de la semaine.
 'use strict';
 
-/* ---------- Réglages des alertes ---------- */
+// Réglages des alertes
 const REGLES = {
   secondesMinParMot: 6,   // moins de 6 s par mot sur une étape = "trop rapide"
   passesMax: 2,           // plus de 2 exercices passés sur une étape = alerte
@@ -61,7 +55,7 @@ const ICONES = {
 };
 const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n] || ''}</svg>`;
 
-/* ---------- Catalogue des étapes (depuis data.js) ---------- */
+// Catalogue des étapes (depuis data.js)
 const ETAPES = [];
 NIVEAUX.forEach((niv, n) => niv.etapes.forEach((et, e) => ETAPES.push({
   cle: niv.id + '-' + (e + 1), n, e, niveau: bilingue(niv.nom).fr, mots: et.map((x) => x.mot), nb: et.length
@@ -70,9 +64,7 @@ const etapeParCle = Object.fromEntries(ETAPES.map((x) => [x.cle, x]));
 const nomEtape = (cle) => { const x = etapeParCle[cle]; return x ? `Niv. ${x.n + 1} · Étape ${x.e + 1}` : cle; };
 const nomEtapeLong = (cle) => { const x = etapeParCle[cle]; return x ? `${nomEtape(cle)} — ${x.niveau}` : cle; };
 
-/* =====================================================================
-   🔌 ACCÈS AU SERVEUR (Supabase : Auth + REST)
-   ===================================================================== */
+// Accès à Supabase (Auth + REST)
 const CLE_SESSION = 'francais-aventures-prof-session';
 const Api = {
   configure() { return typeof CONFIG_SERVEUR !== 'undefined' && /^https:\/\/.+/.test(CONFIG_SERVEUR.url || '') && !!CONFIG_SERVEUR.cleAnon; },
@@ -112,7 +104,7 @@ const Api = {
     return r.status === 204 ? null : r.json();
   },
 
-  /** Lit toutes les lignes (Supabase renvoie 1000 lignes max par requête) */
+  // Lit toutes les lignes (Supabase renvoie 1000 lignes max par requête)
   async toutLire(chemin) {
     const tout = [];
     for (let debut = 0; ; debut += 1000) {
@@ -123,9 +115,7 @@ const Api = {
   }
 };
 
-/* =====================================================================
-   📦 ÉTAT + CHARGEMENT DES DONNÉES
-   ===================================================================== */
+// État + chargement des données
 const ETAT = {
   email: '',
   eleves: [], progression: [], tentatives: [], devoirs: [],
@@ -162,7 +152,7 @@ async function charger() {
   }
 }
 
-/* ---------- Analyse : statistiques, devoirs, alertes ---------- */
+// Analyse : statistiques, devoirs, alertes
 function signalements(t) {
   const s = [];
   if (t.duree_s > 0 && t.duree_s < (t.nb_exercices || 5) * REGLES.secondesMinParMot) s.push('rapide');
@@ -222,8 +212,7 @@ function analyser() {
   ETAT.tentatives.forEach((t) => { const e = parId.get(t.eleve_id); if (e) e.tentatives.push(t); });
   ETAT.progression.forEach((p) => { const e = parId.get(p.eleve_id); if (e) e.progression.push(p); });
 
-  // Classement de la semaine : même calcul que le serveur (fonction « classement »)
-  // une étape compte 1 fois par jour (meilleur essai), les étapes trop rapides ne comptent pas
+  // Même calcul que la fonction SQL « classement »
   const lundi = new Date(); lundi.setHours(0, 0, 0, 0); lundi.setDate(lundi.getDate() - ((lundi.getDay() + 6) % 7));
   eleves.forEach((e) => {
     const meilleurs = {};
@@ -257,9 +246,7 @@ function analyser() {
   ETAT.analyse = { eleves, jours14, classe, lundi };
 }
 
-/* =====================================================================
-   🔐 CONNEXION DU PROF
-   ===================================================================== */
+// Connexion du prof
 function afficherConnexion(message = '') {
   const configure = Api.configure();
   $('#racine').innerHTML = `
@@ -282,9 +269,7 @@ function afficherConnexion(message = '') {
     </div>`;
 }
 
-/* =====================================================================
-   📊 TABLEAU DE BORD
-   ===================================================================== */
+// Tableau de bord
 function afficherTableau() {
   const A = ETAT.analyse;
   const onglets = [
@@ -319,7 +304,7 @@ function afficherOnglet() {
   else c.innerHTML = htmlEnsemble();
 }
 
-/* ---------- Vue d'ensemble ---------- */
+// Vue d'ensemble
 function htmlEnsemble() {
   const A = ETAT.analyse;
   const nb = A.eleves.length;
@@ -330,7 +315,6 @@ function htmlEnsemble() {
   const taux = echus ? Math.round((rendus / echus) * 100) : null;
   const total14 = A.classe.reduce((s, j) => s + j.n, 0);
 
-  // Élèves à surveiller (une ligne par élève, avec toutes ses raisons)
   const alertes = [];
   A.eleves.forEach((e) => {
     const inactif = !e.derniereActivite || (Date.now() - new Date(e.derniereActivite)) / 86400000 >= REGLES.joursInactif;
@@ -371,7 +355,6 @@ function htmlEnsemble() {
     ${htmlClassement()}`;
 }
 
-/** Classement de la semaine, tel que les élèves le voient dans l'appli */
 function htmlClassement() {
   const A = ETAT.analyse;
   const classes = A.eleves.filter((e) => e.pointsSemaine > 0)
@@ -400,7 +383,6 @@ function htmlClassement() {
     </section>`;
 }
 
-/** Histogramme simple (une seule série, barres fines, infobulle au survol + tableau) */
 function htmlHistogramme(points) {
   const max = Math.max(1, ...points.map((p) => p.n));
   const pas = max <= 4 ? 1 : Math.ceil(max / 4);
@@ -425,7 +407,7 @@ function htmlHistogramme(points) {
       </tbody></table></details>`;
 }
 
-/* ---------- Devoirs ---------- */
+// Devoirs
 function htmlDevoirs() {
   const A = ETAT.analyse;
   const demain = new Date(); demain.setDate(demain.getDate() + 7);
@@ -494,7 +476,7 @@ function htmlDevoirs() {
     </section>`;
 }
 
-/* ---------- Élèves ---------- */
+// Élèves
 function htmlBande(jours) {
   return `<span class="bande">${jours.map((j) => `<i class="${j.n >= 3 ? 'a3' : j.n === 2 ? 'a2' : j.n === 1 ? 'a1' : ''}"
     data-tip="${esc(fmtDate(j.jour + 'T12:00', { weekday: 'short', day: 'numeric', month: 'short' }))} : ${j.n} étape${j.n > 1 ? 's' : ''}"></i>`).join('')}</span>`;
@@ -577,7 +559,12 @@ function exporterCsv() {
   const lignes = [['Élève', 'Dernière étape', 'Étapes terminées', 'Étoiles', 'Temps (min)', 'Jours actifs (7 j)', 'Devoirs rendus', 'Devoirs attendus', 'Étapes à vérifier']];
   elevesFiltres().forEach((e) => lignes.push([e.nom, e.derniereActivite ? jourLocal(e.derniereActivite) : '', e.etapes, e.etoiles,
     Math.round(e.temps / 60), e.joursActifs7, e.devoirsRendus, e.devoirsEchus, e.suspects.length]));
-  const csv = '﻿' + lignes.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  // Une cellule qui commence par = + - @ serait lue comme une formule par Excel
+  const cellule = (v) => {
+    const t = String(v);
+    return `"${(/^[=+\-@\t\r]/.test(t) ? "'" + t : t).replace(/"/g, '""')}"`;
+  };
+  const csv = '﻿' + lignes.map((l) => l.map(cellule).join(';')).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   a.download = `eleves-${jourLocal()}.csv`;
@@ -585,9 +572,7 @@ function exporterCsv() {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
-/* =====================================================================
-   ✍️ ACTIONS
-   ===================================================================== */
+// Actions
 async function creerDevoir(form) {
   const titre = form.titre.value.trim();
   const date = form.date.value;
@@ -682,7 +667,7 @@ document.addEventListener('submit', async (ev) => {
   }
 });
 
-/* Infobulle (survol souris ou focus clavier) */
+// Infobulles
 function montrerInfobulle(el) {
   const tip = $('#infobulle');
   tip.textContent = el.dataset.tip;
@@ -698,9 +683,7 @@ document.addEventListener('focusin', (ev) => { const el = ev.target.closest('[da
 document.addEventListener('focusout', () => { $('#infobulle').hidden = true; });
 window.addEventListener('scroll', () => { $('#infobulle').hidden = true; }, true);
 
-/* =====================================================================
-   🚀 DÉMARRAGE
-   ===================================================================== */
+// Démarrage
 ETAT.email = localStorage.getItem(CLE_SESSION + '-email') || '';
 if (Api.configure() && Api.session()) charger();
 else afficherConnexion();
