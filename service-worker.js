@@ -1,7 +1,7 @@
 // Service worker : met l'application en cache pour qu'elle fonctionne hors ligne.
 // Il doit rester à la racine du site. Augmenter VERSION à chaque mise en ligne.
 
-const VERSION = 'v3.0.0';
+const VERSION = 'v4.0.0';
 const NOM_CACHE = 'apprend-plus-' + VERSION;
 
 // La liste des photos est lue dans data.js.
@@ -14,15 +14,26 @@ NIVEAUX.forEach((niv) => {
   }));
 });
 
+// Code de l'application : à compléter si un fichier est ajouté dans js/ ou css/
+const CODE = [
+  'css/base.css', 'css/coco.css', 'css/navigation.css', 'css/ecrans.css', 'css/jeu.css',
+  'fonts/baloo2.woff2', 'fonts/nunito.woff2',
+  'js/main.js', 'js/donnees.js', 'js/reglages.js', 'js/outils.js', 'js/icones.js', 'js/mascotte.js',
+  'js/etat.js', 'js/profils.js', 'js/progression.js', 'js/sync.js', 'js/navigation.js', 'js/actions.js',
+  'js/mises-a-jour.js', 'js/ui/composants.js', 'js/ui/modale.js',
+  'js/ecrans/connexion.js', 'js/ecrans/accueil.js', 'js/ecrans/parcours.js', 'js/ecrans/carnet.js',
+  'js/ecrans/classement.js', 'js/ecrans/credits.js', 'js/ecrans/menu.js',
+  'js/jeu/exercice.js', 'js/jeu/resultat.js'
+];
+
 const FICHIERS_APPLI = [
   './',
   './index.html',
-  './styles.css',
   './config.js',
   './data.js',
   './credits.js',
-  './app.js',
   './manifest.json',
+  ...CODE.map((f) => './' + f),
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -35,7 +46,7 @@ self.addEventListener('install', (event) => {
       cache.addAll(FICHIERS_APPLI.map((url) => new Request(url, { cache: 'reload' })))
     )
   );
-  // Pas de skipWaiting ici : app.js l'envoie quand l'élève n'est pas en plein exercice.
+  // Pas de skipWaiting ici : js/mises-a-jour.js l'envoie quand l'élève n'est pas en plein exercice.
 });
 
 self.addEventListener('activate', (event) => {

@@ -9,7 +9,7 @@
   <meta name="description" content="Apprends le français en t'amusant ! / 轻松学法语！">
 
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#FAF6F2">
+  <meta name="theme-color" content="#FFF6EC">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
@@ -19,13 +19,17 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
   <meta name="format-detection" content="telephone=no">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="preload" href="fonts/baloo2.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/coco.css">
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/ecrans.css">
+  <link rel="stylesheet" href="css/jeu.css">
 </head>
 <body>
   <div id="app" class="app"></div>
-
   <div id="modale" class="modale-fond" hidden></div>
-
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <noscript><p style="padding:24px;text-align:center">Active JavaScript pour utiliser l'appli. / 请启用 JavaScript。</p></noscript>
@@ -33,6 +37,6 @@
   <script src="config.js"></script>
   <script src="data.js"></script>
   <script src="credits.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

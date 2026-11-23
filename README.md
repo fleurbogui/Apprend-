@@ -10,12 +10,13 @@ Les élèves se connectent avec leur prénom et un code secret de 4 chiffres. Un
 - Quatre types d'exercices : lettres à cliquer, mot à compléter, mot à écrire, devinette avec indice.
 - Trois essais par exercice, puis une à trois étoiles selon le nombre d'erreurs.
 - Onglets Accueil, Parcours, Carnet (mots appris, à réécouter) et Classement.
+- Coco, un petit coq, guide l'élève : il donne les consignes et réagit aux réponses dans des bulles de BD.
 
 ## Structure
 
 | Fichier | Rôle |
 |---|---|
-| `index.html`, `app.js`, `styles.css` | Application élève |
+| `index.html`, `js/`, `css/`, `fonts/` | Application élève (détail ci-dessous) |
 | `data.js` | Niveaux, étapes et exercices |
 | `images/`, `credits.js` | Photos (Wikimedia Commons) et leurs auteurs |
 | `prof.html`, `prof.js`, `prof.css` | Tableau de bord des profs |
@@ -25,6 +26,32 @@ Les élèves se connectent avec leur prénom et un code secret de 4 chiffres. Un
 | `service-worker.js` | Cache hors connexion et mises à jour |
 | `manifest.json`, `icons/` | Installation sur l'écran d'accueil |
 | `netlify.toml`, `vercel.json` | Déploiement et en-têtes de sécurité |
+
+## Organisation du code
+
+L'application élève est écrite en modules JavaScript, sans outil de build. `index.html` charge d'abord `config.js`, `data.js` et `credits.js`, puis `js/main.js`.
+
+| Fichier | Rôle |
+|---|---|
+| `js/main.js` | Démarrage, routes (`#/parcours`, `#/etape/N/E`...) et actions communes |
+| `js/donnees.js` | Accès aux niveaux, aux crédits et à la configuration du serveur |
+| `js/reglages.js` | Réglages du jeu : essais, points, pénalités, types d'exercices |
+| `js/outils.js` | Petites fonctions partagées et canal d'événements entre modules |
+| `js/profils.js` | Profils des élèves gardés sur le téléphone |
+| `js/progression.js` | Étapes faites, étoiles, déblocage, devoirs, série de jours |
+| `js/sync.js` | Échanges avec Supabase et envoi des étapes en attente |
+| `js/navigation.js`, `js/actions.js` | Navigation par adresse et gestion des boutons (`data-action`) |
+| `js/mascotte.js` | Coco (dessin SVG, quatre humeurs) et ses bulles |
+| `js/ecrans/` | Un fichier par écran : connexion, accueil, parcours, carnet, classement, crédits, menu |
+| `js/jeu/` | Déroulement des exercices et écran de résultat |
+| `js/ui/` | Éléments partagés : barre du haut, navigation, chemin, feuille du bas |
+| `js/mises-a-jour.js` | Enregistrement du service worker et mise à jour automatique |
+| `css/base.css` | Couleurs, polices, boutons, cartes, champs |
+| `css/coco.css`, `css/navigation.css`, `css/ecrans.css`, `css/jeu.css` | Styles par partie de l'appli |
+
+Chaque bouton porte un attribut `data-action`. Le module qui le gère le déclare avec `surActions({ nom: fonction })`. Pour ajouter un fichier dans `js/` ou `css/`, il faut aussi l'ajouter à la liste `CODE` de `service-worker.js`, sinon il ne sera pas disponible hors connexion.
+
+Les polices Baloo 2 et Nunito (licence SIL Open Font License) sont dans `fonts/`.
 
 ## Lancer en local
 

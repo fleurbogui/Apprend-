@@ -1,0 +1,33 @@
+/* Barre du haut et barre de navigation du bas */
+
+.barre-haut {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(10px + var(--sur-haut)) 16px 10px;
+  background: var(--creme); border-bottom: var(--trait) solid var(--encre);
+}
+.barre-haut .moi { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; }
+.barre-haut .moi b, .barre-titre {
+  font-family: var(--titre); font-weight: 800; font-size: 1.25rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.barre-titre { flex: 1; min-width: 0; }
+
+.nav-bas {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 30;
+  width: 100%; max-width: 560px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  padding: 8px 10px calc(8px + var(--sur-bas));
+  background: var(--blanc); border-top: var(--trait) solid var(--encre);
+}
+.nav-bas button {
+  min-height: 56px; border-radius: 16px; border: 2px solid transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-family: var(--titre); font-weight: 700; font-size: .78rem; color: var(--encre-douce);
+}
+.nav-bas button .ico { width: 24px; height: 24px; }
+.nav-bas button.actif {
+  background: var(--rouge); color: var(--blanc);
+  border-color: var(--encre); box-shadow: var(--ombre-petite);
+}
+.avec-nav { padding-bottom: calc(96px + var(--sur-bas)); }

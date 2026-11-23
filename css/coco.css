@@ -1,0 +1,37 @@
+/* Coco la mascotte et ses bulles de BD */
+
+.coco { flex-shrink: 0; overflow: visible; }
+.coco-corps { transform-origin: 60px 110px; animation: dandine 3.2s ease-in-out infinite; }
+@keyframes dandine { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+/* Bec qui s'ouvre et se ferme quand Coco parle */
+.coco-bec-ferme { opacity: 0; animation: bec-ferme .34s steps(1) 6; }
+.coco-bec-ouvert { animation: bec-ouvert .34s steps(1) 6; }
+@keyframes bec-ouvert { 50% { opacity: 0; } }
+@keyframes bec-ferme { 50% { opacity: 1; } }
+
+.coco-bravo .coco-corps { animation: saute .5s ease 3, dandine 3.2s ease-in-out 1.5s infinite; }
+@keyframes saute { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-14px) rotate(-4deg); } }
+.coco-oups .coco-corps { animation: tremble .45s ease 1; }
+@keyframes tremble { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+.parole { display: flex; align-items: flex-end; gap: 10px; }
+.parole-droite { flex-direction: row-reverse; }
+.bulle {
+  position: relative; flex: 1; min-width: 0;
+  background: var(--blanc); border: var(--trait) solid var(--encre); border-radius: 22px;
+  box-shadow: var(--ombre); padding: 12px 16px; margin-bottom: 18px;
+}
+/* Pointe de la bulle tournée vers Coco (contour + remplissage) */
+.bulle::before, .bulle::after { content: ""; position: absolute; bottom: 14px; border-style: solid; }
+.parole-gauche .bulle::before { left: -15px; border-width: 9px 15px 9px 0; border-color: transparent var(--encre) transparent transparent; }
+.parole-gauche .bulle::after { left: -10px; bottom: 16.5px; border-width: 6.5px 11px 6.5px 0; border-color: transparent var(--blanc) transparent transparent; }
+.parole-droite .bulle::before { right: -15px; border-width: 9px 0 9px 15px; border-color: transparent transparent transparent var(--encre); }
+.parole-droite .bulle::after { right: -10px; bottom: 16.5px; border-width: 6.5px 0 6.5px 11px; border-color: transparent transparent transparent var(--blanc); }
+
+.bulle-fr { font-weight: 800; font-size: 1.05rem; line-height: 1.35; }
+.bulle-zh { margin-top: 4px; font-size: .9rem; color: var(--encre-douce); }
+.parole-grande .bulle { padding: 14px 18px; }
+.parole-grande .bulle-fr { font-family: var(--titre); font-weight: 700; font-size: 1.3rem; line-height: 1.25; }
+.bulle.rebond { animation: rebond .3s ease; }
+@keyframes rebond { 40% { transform: scale(1.04); } }
