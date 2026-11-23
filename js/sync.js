@@ -41,8 +41,33 @@ export function fusionner(profil, donnees) {
   return recuperees;
 }
 
-// Le serveur ne reconnaît plus le jeton : le prof a remis le code à zéro
-function sessionExpiree(profil) {
+// Retire du téléphone les élèves que le prof a supprimés sur le serveur.
+// Seuls les profils déjà passés par le serveur sont vérifiés : un profil créé
+// sans serveur n'est jamais effacé. Renvoie les profils retirés.
+export async function retirerProfilsSupprimes() {
+  if (!serveurConfigure() || navigator.onLine === false) return [];
+  const aVerifier = Profils.liste().filter((p) => p.jeton || p.synchro).slice(0, 20);
+  if (!aVerifier.length) return [];
+  let absents;
+  try {
+    absents = await rpc('eleves_absents', { p_noms: aVerifier.map((p) => p.nom) });
+  } catch (e) {
+    // Hors ligne, ou fonction pas encore installée sur le serveur : on ne touche à rien
+    return [];
+  }
+  if (!Array.isArray(absents) || !absents.length) return [];
+  const noms = new Set(absents);
+  const actif = P();
+  const retires = aVerifier.filter((p) => noms.has(p.nom));
+  retires.forEach((p) => Profils.retirer(p.cle));
+  if (retires.length) emettre('profils-retires', { actif: retires.includes(actif) });
+  return retires;
+}
+
+// Le serveur ne reconnaît plus le jeton : élève supprimé, ou code remis à zéro par le prof
+async function sessionExpiree(profil) {
+  const retires = await retirerProfilsSupprimes();
+  if (retires.includes(profil)) return;
   profil.jeton = null;
   profil.codeLocal = null;
   Profils.sauver();
@@ -65,7 +90,7 @@ export async function chargerClassement(profil = P()) {
   if (!profil || !profil.jeton || !serveurConfigure() || navigator.onLine === false) return false;
   try {
     const c = await rpc('classement', { p_jeton: profil.jeton, p_debut: debutSemaine().toISOString() });
-    if (c && c.erreur === 'session') { sessionExpiree(profil); return false; }
+    if (c && c.erreur === 'session') { await sessionExpiree(profil); return false; }
     if (!c || !Array.isArray(c.semaine)) return false;
     profil.classement = nettoyerClassement(c);
     Profils.sauver();
@@ -87,14 +112,14 @@ export async function synchroniser() {
   dernierEssai = Date.now();
   try {
     const d = await rpc('eleve_session', { p_jeton: profil.jeton });
-    if (d && d.erreur === 'session') { sessionExpiree(profil); return; }
+    if (d && d.erreur === 'session') { await sessionExpiree(profil); return; }
     const recuperees = fusionner(profil, d || {});
     Profils.sauver();
 
     while (profil.enAttente.length) {
       const lot = profil.enAttente.slice(0, 50);
       const r = await rpc('eleve_envoyer', { p_jeton: profil.jeton, p_tentatives: lot });
-      if (r && r.erreur === 'session') { sessionExpiree(profil); return; }
+      if (r && r.erreur === 'session') { await sessionExpiree(profil); return; }
       const envoyes = new Set(lot.map((t) => t.client_id));
       profil.enAttente = profil.enAttente.filter((t) => !envoyes.has(t.client_id));
       if (r && Array.isArray(r.devoirs)) profil.devoirs = r.devoirs;

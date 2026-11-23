@@ -431,6 +431,23 @@ begin
 end;
 $$;
 
+-- Parmi les prénoms gardés sur un téléphone, ceux qui n'existent plus sur le
+-- serveur (élève supprimé par le prof). L'appli retire alors ces profils du téléphone.
+-- Ne révèle rien de plus que eleve_connexion, qui dit déjà si un prénom est pris.
+create or replace function public.eleves_absents(p_noms text[])
+returns text[]
+language sql stable security definer set search_path = public
+as $$
+  select coalesce(array_agg(n), '{}')
+  from unnest(coalesce(p_noms, '{}'::text[])) with ordinality as x(n, i)
+  where x.i <= 20
+    and not exists (
+      select 1 from public.eleves e
+      where e.cle = translate(lower(btrim(regexp_replace(coalesce(x.n, ''), '\s+', ' ', 'g'))),
+                              'àâäáãåçéèêëíìîïñóòôöõúùûüýÿœæ',
+                              'aaaaaaceeeeiiiinooooouuuuyyoa'));
+$$;
+
 -- Droits d'exécution des fonctions
 
 revoke all on function public.est_prof()                      from public, anon;
@@ -442,6 +459,7 @@ revoke all on function public.eleve_session(text)             from public;
 revoke all on function public.eleve_envoyer(text, jsonb)      from public;
 revoke all on function public.classement(text, timestamptz)   from public;
 revoke all on function public.prof_reinitialiser_code(uuid)   from public, anon;
+revoke all on function public.eleves_absents(text[])          from public;
 
 grant execute on function public.est_prof()                    to authenticated;
 grant execute on function public.eleve_connexion(text, text)   to anon, authenticated;
@@ -449,3 +467,4 @@ grant execute on function public.eleve_session(text)           to anon, authenti
 grant execute on function public.eleve_envoyer(text, jsonb)    to anon, authenticated;
 grant execute on function public.classement(text, timestamptz) to anon, authenticated;
 grant execute on function public.prof_reinitialiser_code(uuid) to authenticated;
+grant execute on function public.eleves_absents(text[])        to anon, authenticated;

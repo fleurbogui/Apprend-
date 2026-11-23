@@ -56,6 +56,13 @@ export const Profils = {
   deconnecter() {
     this.data.actif = null;
     this.sauver();
+  },
+
+  // Seulement pour un élève supprimé par le prof sur le serveur
+  retirer(cle) {
+    delete this.data.profils[cle];
+    if (this.data.actif === cle) this.data.actif = null;
+    this.sauver();
   }
 };
 

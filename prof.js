@@ -631,7 +631,14 @@ async function remettreCodeAZero(id, bouton) {
 async function supprimerEleve(id, bouton) {
   if (!confirmer('eleve' + id, bouton, 'Supprimer définitivement ? Clique encore')) return;
   try {
-    await Api.requete(`eleves?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    // Supabase ne signale pas une suppression refusée par les règles d'accès :
+    // on demande les lignes supprimées pour vérifier que l'élève est bien parti.
+    const supprimes = await Api.requete(`eleves?id=eq.${encodeURIComponent(id)}&select=id`,
+      { method: 'DELETE', headers: { Prefer: 'return=representation' } });
+    if (!Array.isArray(supprimes) || !supprimes.length) {
+      toast('La base a refusé la suppression. Lance supabase/maj-eleves-supprimes.sql dans Supabase.');
+      return;
+    }
     ETAT.eleves = ETAT.eleves.filter((e) => e.id !== id);
     ETAT.tentatives = ETAT.tentatives.filter((t) => t.eleve_id !== id);
     ETAT.progression = ETAT.progression.filter((p) => p.eleve_id !== id);

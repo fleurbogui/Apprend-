@@ -69,6 +69,8 @@ Puis ouvrir http://localhost:8000. Le tableau de bord est sur http://localhost:8
 
 Le détail est dans `GUIDE-PROF.md`.
 
+Base déjà installée : exécuter aussi `supabase/maj-eleves-supprimes.sql`. Il donne au prof le droit de supprimer un élève (avec sa progression) et ajoute `eleves_absents`, qui retire les élèves supprimés des téléphones.
+
 ## Mettre en ligne
 
 Le site doit être servi en HTTPS. Netlify, Vercel et GitHub Pages conviennent. Les fichiers `netlify.toml` et `vercel.json` ajoutent les en-têtes de sécurité et bloquent l'accès à `.env`, `outils/` et `supabase/`.

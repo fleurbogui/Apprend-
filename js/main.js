@@ -6,7 +6,7 @@ import { ecouter, parler, toast } from './outils.js';
 import { etat } from './etat.js';
 import { P, Profils } from './profils.js';
 import { etapeDebloquee, niveauDebloque } from './progression.js';
-import { dernierEssai, serveurConfigure, synchroniser } from './sync.js';
+import { dernierEssai, retirerProfilsSupprimes, serveurConfigure, synchroniser } from './sync.js';
 import { aller, afficherRoute, definirRouteur, ecranPrecedent, retourVers } from './navigation.js';
 import { installerActions, surActions } from './actions.js';
 import { fermerModale, installerModale } from './ui/modale.js';
@@ -71,6 +71,15 @@ ecouter('session-expiree', () => {
   etat.messageConnexion = 'Ton prof a remis ton code à zéro. Choisis un nouveau code secret.';
   aller('#/', true);
 });
+// Élèves supprimés par le prof : ils disparaissent de « Déjà venus sur ce téléphone »
+ecouter('profils-retires', ({ actif }) => {
+  if (actif) {
+    etat.messageConnexion = 'Ce compte n\'existe plus. Écris ton prénom et choisis un code secret.';
+    aller('#/', true);
+  } else if (etat.ecran === 'connexion') {
+    afficherConnexion();
+  }
+});
 
 installerActions();
 installerModale();
@@ -97,3 +106,4 @@ if (serveurConfigure() && P() && !P().jeton) {
 }
 afficherRoute();
 synchroniser();
+retirerProfilsSupprimes();
